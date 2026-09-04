@@ -1,0 +1,6 @@
+{
+  "name": "Terminal Portfolio",
+  "description": "A developer personal homepage with an interactive terminal interface, custom themes, virtual file system, and project showcases.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
