@@ -23,6 +23,7 @@ import { BentoView } from './components/templates/BentoView';
 import { AcademicView } from './components/templates/AcademicView';
 import { RetroDesktopView } from './components/templates/RetroDesktopView';
 import { TelemetryView } from './components/templates/TelemetryView';
+import { DevOpsControlView } from './components/templates/DevOpsControlView';
 import { SwissBrutalismView } from './components/templates/SwissBrutalismView';
 import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
@@ -100,7 +101,7 @@ export default function App() {
   │  Interactive Portfolio & Multi-Style Digital CV • ssfu.dev   │
   ╰──────────────────────────────────────────────────────────────╯
 
-Styles: [terminal] [ide] [bento] [academic] (Use top switcher or type 'template <name>')
+Styles: [terminal] [ide] [bento] [devops] [academic] (Use top switcher or type 'template <name>')
 Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [template]`,
       },
     };
@@ -370,10 +371,11 @@ Available Templates:
   • bento      - Modern Raycast / Linear Obsidian Bento Grid
   • retro      - Win95 / Classic Retro Desktop OS with Draggable Windows & Minesweeper
   • telemetry  - Grafana / SRE Engineer Production Metrics Dashboard
+  • devops     - CI/CD Delivery Control Plane and Release Pipeline
   • brutalism  - Swiss International / Minimalist Brutalism High-Contrast Layout
   • academic   - LaTeX Paper / Print-ready Academic CV
 
-Usage: template <name> (e.g. template retro, template telemetry, template brutalism, template ide)`;
+Usage: template <name> (e.g. template devops, template telemetry, template brutalism, template ide)`;
         } else {
           const chosen = arg.toLowerCase();
           if (chosen === 'ide' || chosen === 'vscode') {
@@ -392,6 +394,10 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
             setCurrentTemplate('telemetry');
             outputType = 'success';
             outputContent = `Switching view to SRE / Engineer Telemetry Dashboard...`;
+          } else if (chosen === 'devops' || chosen === 'cicd' || chosen === 'pipeline' || chosen === 'platform') {
+            setCurrentTemplate('devops');
+            outputType = 'success';
+            outputContent = `Switching view to DevOps Delivery Control Plane...`;
           } else if (chosen === 'brutalism' || chosen === 'swiss' || chosen === 'minimal') {
             setCurrentTemplate('brutalism');
             outputType = 'success';
@@ -406,7 +412,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
             outputContent = `Staying in Terminal CLI mode.`;
           } else {
             outputType = 'error';
-            outputContent = `Unknown template '${arg}'. Valid options: terminal, retro, telemetry, brutalism, academic, bento, ide`;
+            outputContent = `Unknown template '${arg}'. Valid options: terminal, retro, telemetry, devops, brutalism, academic, bento, ide`;
           }
         }
         break;
@@ -659,6 +665,32 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
           config={portfolioConfig}
+        />
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
+      </div>
+    );
+  }
+
+  // Render DevOps CI/CD Control Plane View
+  if (currentTemplate === 'devops') {
+    return (
+      <div className="min-h-screen bg-[#07100d] relative print:bg-white">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
+          />
+        </div>
+        <DevOpsControlView
+          config={portfolioConfig}
+          onSwitchTemplate={setCurrentTemplate}
         />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
