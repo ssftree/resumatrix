@@ -1,0 +1,77 @@
+- generic [ref=e3]:
+  - navigation "Portfolio layouts" [ref=e5]:
+    - generic [ref=e6]: "Style:"
+    - generic [ref=e7]:
+      - button "Terminal CLI" [ref=e8]:
+        - generic [ref=e11]: Terminal
+        - generic [ref=e12]: CLI
+      - button "Cloud IDE VS Code" [ref=e13]:
+        - generic [ref=e18]: Cloud IDE
+        - generic [ref=e19]: VS Code
+      - button "Bento Grid Modern" [ref=e20]:
+        - generic [ref=e26]: Bento Grid
+        - generic [ref=e27]: Modern
+      - button "Retro OS Win95" [ref=e28]:
+        - generic [ref=e31]: Retro OS
+        - generic [ref=e32]: Win95
+      - button "Telemetry Grafana" [ref=e33]:
+        - generic [ref=e36]: Telemetry
+        - generic [ref=e37]: Grafana
+      - button "Brutalism Swiss" [ref=e38]:
+        - generic [ref=e41]: Brutalism
+        - generic [ref=e42]: Swiss
+      - button "LaTeX CV Print" [ref=e43]:
+        - generic [ref=e47]: LaTeX CV
+        - generic [ref=e48]: Print
+    - button "Customize" [ref=e50]
+  - main [ref=e53]:
+    - generic [ref=e54]:
+      - generic [ref=e55]:
+        - generic "Window Controls" [ref=e56]:
+          - button "×" [ref=e57] [cursor=pointer]
+          - button "-" [ref=e59] [cursor=pointer]
+          - button "+" [ref=e61] [cursor=pointer]
+        - generic [ref=e63]:
+          - generic [ref=e66]: "guest@ssfu.dev:"
+          - generic [ref=e67]: ~
+          - generic [ref=e68]: (zsh)
+      - generic [ref=e69]:
+        - button "Visual Cards" [ref=e70] [cursor=pointer]
+        - button "Enable Mechanical Audio FX" [ref=e74] [cursor=pointer]
+        - button "Disable Retro CRT Scanlines" [ref=e79] [cursor=pointer]
+        - button "Matrix CRT" [ref=e83] [cursor=pointer]
+        - button "Clear Screen (Ctrl+L)" [ref=e91] [cursor=pointer]
+        - button "Show Command Help" [ref=e95] [cursor=pointer]
+        - button "Fullscreen" [ref=e99] [cursor=pointer]
+    - generic [ref=e107]:
+      - generic [ref=e108]: "███████╗███████╗███████╗██╗ ██╗ ██████╗ ███████╗██╗ ██╗ ██╔════╝██╔════╝██╔════╝██║ ██║ ██╔══██╗██╔════╝██║ ██║ ███████╗███████╗█████╗ ██║ ██║ ██║ ██║█████╗ ██║ ██║ ╚════██║╚════██║██╔══╝ ██║ ██║ ██║ ██║██╔══╝ ╚██╗ ██╔╝ ███████║███████║██║ ╚██████╔╝██╗██████╔╝███████╗ ╚████╔╝ ╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝╚═════╝ ╚══════╝ ╚═══╝ ╭──────────────────────────────────────────────────────────────╮ │ Welcome to ssfu's Engineering Workspace (v2.5.0) │ │ Interactive Portfolio & Multi-Style Digital CV • ssfu.dev │ ╰──────────────────────────────────────────────────────────────╯ Styles: [terminal] [ide] [bento] [academic] (Use top switcher or type 'template <name>') Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [template]"
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: guest@ssfu.dev
+          - generic [ref=e114]: ":"
+          - generic [ref=e115]: ~
+          - generic [ref=e116]: $
+          - textbox [active] [ref=e118]
+        - generic [ref=e120]:
+          - generic [ref=e121]: "Quick:"
+          - button "help" [ref=e122] [cursor=pointer]
+          - button "about" [ref=e123] [cursor=pointer]
+          - button "skills" [ref=e124] [cursor=pointer]
+          - button "projects" [ref=e125] [cursor=pointer]
+          - button "exp" [ref=e126] [cursor=pointer]
+          - button "contact" [ref=e127] [cursor=pointer]
+          - button "resume" [ref=e128] [cursor=pointer]
+          - button "neofetch" [ref=e129] [cursor=pointer]
+          - button "theme" [ref=e130] [cursor=pointer]
+          - button "matrix" [ref=e131] [cursor=pointer]
+          - button "clear" [ref=e132] [cursor=pointer]
+    - generic [ref=e133]:
+      - generic [ref=e134]:
+        - generic [ref=e137]: zsh 5.9
+        - generic [ref=e138]: UTF-8
+      - generic [ref=e139]:
+        - generic [ref=e140]: ssfu.dev
+        - generic [ref=e141]:
+          - text: "Theme:"
+          - strong [ref=e142]: Matrix CRT
+        - generic [ref=e143]: "Commands: 0"
