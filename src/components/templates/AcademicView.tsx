@@ -1,12 +1,5 @@
 import React from 'react';
 import { Printer, Download, ArrowLeft, Terminal, LayoutGrid, Code2, Mail, Github, Globe } from 'lucide-react';
-import { 
-  ABOUT_DATA, 
-  EXPERIENCE_DATA, 
-  PROJECTS_DATA, 
-  SKILLS_DATA, 
-  CONTACT_DATA 
-} from '../../data/portfolioData';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
 

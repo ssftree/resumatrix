@@ -99,6 +99,7 @@ export interface VirtualFile {
 export interface TerminalHistoryItem {
   id: string;
   command: string;
+  path?: string;
   timestamp: string;
   output: {
     type: 'text' | 'error' | 'success' | 'neofetch' | 'table' | 'projects' | 'skills' | 'experience' | 'contact' | 'help' | 'matrix' | 'cat' | 'ls' | 'about';

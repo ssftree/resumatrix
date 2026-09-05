@@ -20,16 +20,9 @@ import {
   Activity,
   ArrowUpRight
 } from 'lucide-react';
-import { 
-  PROJECTS_DATA, 
-  SKILLS_DATA, 
-  EXPERIENCE_DATA, 
-  CONTACT_DATA, 
-  ABOUT_DATA,
-  NEOFETCH_DATA
-} from '../../data/portfolioData';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
+import { safeExternalHref } from '../../utils/url';
 
 interface BentoViewProps {
   onSwitchTemplate: (template: AppTemplate) => void;
@@ -47,7 +40,6 @@ export const BentoView: React.FC<BentoViewProps> = ({
   const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
   const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
   const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
-  const system = config.system || DEFAULT_PORTFOLIO_CONFIG.system;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -106,7 +98,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 transition-colors"
             >
               {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedEmail ? 'Email Copied!' : CONTACT_DATA.email}</span>
+              <span>{copiedEmail ? 'Email Copied!' : contact.email}</span>
             </button>
             <button
               onClick={onOpenResumeModal}
@@ -175,7 +167,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
                   Activity & Commits
                 </div>
                 <a
-                  href={`https://${CONTACT_DATA.github}`}
+                  href={safeExternalHref(contact.github)}
                   target="_blank"
                   rel="noreferrer"
                   className="text-xs text-neutral-400 hover:text-white flex items-center gap-1"
@@ -225,7 +217,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
             </div>
 
             <div className="mt-4 pt-3 border-t border-neutral-800/80 flex items-center justify-between text-xs text-neutral-400">
-              <span className="font-mono">GitHub: github.com/{CONTACT_DATA.github.split('/').pop()}</span>
+              <span className="font-mono">GitHub: {contact.github.replace(/^https?:\/\//, '')}</span>
             </div>
           </div>
 
@@ -356,7 +348,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
                     <div className="flex items-center justify-between pt-1 text-xs">
                       {project.githubUrl ? (
                         <a
-                          href={`https://${project.githubUrl}`}
+                          href={safeExternalHref(project.githubUrl)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-neutral-400 hover:text-white flex items-center gap-1 font-mono text-[11px]"
@@ -367,7 +359,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
 
                       {project.demoUrl && (
                         <a
-                          href={`https://${project.demoUrl}`}
+                          href={safeExternalHref(project.demoUrl)}
                           target="_blank"
                           rel="noreferrer"
                           className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-mono text-[11px]"

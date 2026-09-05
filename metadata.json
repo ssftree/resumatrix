@@ -2,5 +2,5 @@
   "name": "Terminal Portfolio",
   "description": "A multi-archetype developer portfolio featuring interactive Linux CLI, Retro Win95 Desktop OS, SRE Telemetry Dashboard, Swiss Minimalist Brutalism, Cloud IDE, Bento Grid, and LaTeX CV.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

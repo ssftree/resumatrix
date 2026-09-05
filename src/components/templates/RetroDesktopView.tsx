@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
+import { safeExternalHref } from '../../utils/url';
 
 interface RetroDesktopViewProps {
   config?: PortfolioConfig;
@@ -739,7 +740,7 @@ export const RetroDesktopView: React.FC<RetroDesktopViewProps> = ({
                         <div className="flex items-center gap-2 pt-2 border-t">
                           {activeProjectData.demoUrl && (
                             <a
-                              href={activeProjectData.demoUrl}
+                              href={safeExternalHref(activeProjectData.demoUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="px-3 py-1 bg-[#c0c0c0] border border-t-white border-l-white border-r-black border-b-black font-bold text-xs flex items-center gap-1 active:border-t-black active:border-l-black active:border-r-white active:border-b-white"
@@ -749,7 +750,7 @@ export const RetroDesktopView: React.FC<RetroDesktopViewProps> = ({
                           )}
                           {activeProjectData.githubUrl && (
                             <a
-                              href={activeProjectData.githubUrl}
+                              href={safeExternalHref(activeProjectData.githubUrl)}
                               target="_blank"
                               rel="noreferrer"
                               className="px-3 py-1 bg-[#c0c0c0] border border-t-white border-l-white border-r-black border-b-black font-bold text-xs flex items-center gap-1 active:border-t-black active:border-l-black active:border-r-white active:border-b-white"

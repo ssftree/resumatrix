@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
+import { safeExternalHref } from '../../utils/url';
 
 interface TelemetryViewProps {
   config?: PortfolioConfig;
@@ -484,7 +485,7 @@ export const TelemetryView: React.FC<TelemetryViewProps> = ({
                   <div className="flex items-center gap-3">
                     {p.githubUrl && (
                       <a
-                        href={p.githubUrl}
+                        href={safeExternalHref(p.githubUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-neutral-400 hover:text-white flex items-center gap-1 transition-colors text-[11px]"
@@ -494,7 +495,7 @@ export const TelemetryView: React.FC<TelemetryViewProps> = ({
                     )}
                     {p.demoUrl && (
                       <a
-                        href={p.demoUrl}
+                        href={safeExternalHref(p.demoUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-medium transition-colors text-[11px]"

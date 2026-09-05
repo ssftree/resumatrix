@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { X, Printer, Download, Mail, ExternalLink, MapPin, Briefcase, GraduationCap, Code } from 'lucide-react';
 import { PortfolioConfig, ThemeConfig } from '../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
+import { safeExternalHref } from '../utils/url';
+import { useModalA11y } from '../hooks/useModalA11y';
 
 interface ResumeModalProps {
   isOpen: boolean;
@@ -16,6 +18,16 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
   theme,
   config = DEFAULT_PORTFOLIO_CONFIG,
 }) => {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useModalA11y({
+    isOpen,
+    onClose,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+  });
+
   if (!isOpen) return null;
 
   const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
@@ -31,6 +43,10 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-sm">
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resume-modal-title"
         className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-xl border shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         style={{
           backgroundColor: theme.surface,
@@ -45,7 +61,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
         >
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <h2 className="font-bold text-sm sm:text-base">Curriculum Vitae — {profile.name}</h2>
+            <h2 id="resume-modal-title" className="font-bold text-sm sm:text-base">Curriculum Vitae — {profile.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -55,7 +71,9 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
               <Printer className="w-3.5 h-3.5" /> Print / PDF
             </button>
             <button
+              ref={closeButtonRef}
               onClick={onClose}
+              aria-label="Close résumé"
               className="p-1.5 rounded-lg hover:bg-white/10 opacity-70 hover:opacity-100 transition-colors cursor-pointer"
             >
               <X className="w-4 h-4" />
@@ -83,12 +101,12 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({
                 <Mail className="w-3 h-3" /> {contact.email}
               </a>
               {contact.github && (
-                <a href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                <a href={safeExternalHref(contact.github)} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
                   GitHub
                 </a>
               )}
               {contact.blog && (
-                <a href={contact.blog.startsWith('http') ? contact.blog : `https://${contact.blog}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                <a href={safeExternalHref(contact.blog)} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
                   Website: {contact.blog.replace(/^https?:\/\//, '')}
                 </a>
               )}

@@ -25,6 +25,7 @@ import {
 } from '../data/portfolioData';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
 import { THEMES } from '../utils/themes';
+import { safeExternalHref } from '../utils/url';
 
 interface TerminalOutputProps {
   item: TerminalHistoryItem;
@@ -429,7 +430,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <div className="flex items-center gap-3">
                       {p.githubUrl && (
                         <a
-                          href={p.githubUrl}
+                          href={safeExternalHref(p.githubUrl)}
                           target="_blank"
                           rel="noreferrer"
                           className="opacity-70 hover:opacity-100 flex items-center gap-1 hover:underline"
@@ -439,7 +440,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                       )}
                       {p.demoUrl && (
                         <a
-                          href={p.demoUrl}
+                          href={safeExternalHref(p.demoUrl)}
                           target="_blank"
                           rel="noreferrer"
                           className="opacity-70 hover:opacity-100 flex items-center gap-1 hover:underline font-medium"
@@ -542,7 +543,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                   <a
-                    href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`}
+                    href={safeExternalHref(contact.github)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -551,7 +552,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <span className="text-[11px] font-semibold">GitHub</span>
                   </a>
                   <a
-                    href={contact.linkedin.startsWith('http') ? contact.linkedin : `https://${contact.linkedin}`}
+                    href={safeExternalHref(contact.linkedin)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -560,7 +561,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <span className="text-[11px] font-semibold">LinkedIn</span>
                   </a>
                   <a
-                    href={contact.twitter.startsWith('http') ? contact.twitter : `https://${contact.twitter}`}
+                    href={safeExternalHref(contact.twitter)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -570,7 +571,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                   </a>
                   {contact.blog && (
                     <a
-                      href={contact.blog.startsWith('http') ? contact.blog : `https://${contact.blog}`}
+                      href={safeExternalHref(contact.blog)}
                       target="_blank"
                       rel="noreferrer"
                       className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -673,7 +674,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
         <div className="flex items-center gap-2 font-mono text-xs sm:text-sm select-text flex-wrap">
           <span style={{ color: theme.promptUser }} className="font-semibold">guest@ssfu.dev</span>
           <span className="opacity-50">:</span>
-          <span style={{ color: theme.promptPath }}>~</span>
+          <span style={{ color: theme.promptPath }}>{item.path || '~'}</span>
           <span style={{ color: theme.accent }} className="font-bold">$</span>
           <span className="font-semibold text-neutral-100">{item.command}</span>
           <span className="text-[10px] opacity-40 ml-auto hidden sm:inline">{item.timestamp}</span>

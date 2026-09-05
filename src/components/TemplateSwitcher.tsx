@@ -68,7 +68,11 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
   ];
 
   return (
-    <div className="flex items-center gap-1.5 bg-black/85 backdrop-blur-md p-1.5 rounded-xl border border-neutral-800 shadow-2xl text-xs select-none max-w-full overflow-x-auto scrollbar-none">
+    <nav
+      aria-label="Portfolio layouts"
+      className="flex items-center gap-1.5 bg-black/85 backdrop-blur-md p-1.5 rounded-xl border border-neutral-800 shadow-2xl text-xs select-none overflow-x-auto scrollbar-none"
+      style={{ maxWidth: 'calc(100vw - 2rem)' }}
+    >
       <span className="text-[10px] text-neutral-500 font-mono px-1 hidden lg:inline-block uppercase tracking-wider shrink-0">
         Style:
       </span>
@@ -80,6 +84,7 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
               key={tpl.id}
               id={`template-switch-${tpl.id}`}
               onClick={() => onSelectTemplate(tpl.id)}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all font-mono whitespace-nowrap shrink-0 ${
                 isActive
                   ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
@@ -115,6 +120,6 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
           </button>
         </>
       )}
-    </div>
+    </nav>
   );
 };

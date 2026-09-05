@@ -12,8 +12,6 @@ import { ResumeModal } from './components/ResumeModal';
 import { GuiPreview } from './components/GuiPreview';
 import { 
   ASCII_BANNER, 
-  CONTACT_DATA, 
-  PROJECTS_DATA, 
   VIRTUAL_FILESYSTEM 
 } from './data/portfolioData';
 import { TerminalHistoryItem, ThemeConfig, ThemeKey, AppTemplate, PortfolioConfig } from './types';
@@ -28,6 +26,7 @@ import { TelemetryView } from './components/templates/TelemetryView';
 import { SwissBrutalismView } from './components/templates/SwissBrutalismView';
 import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
+import { parsePortfolioConfigJson } from './utils/portfolioConfig';
 
 export default function App() {
   const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>('terminal');
@@ -39,7 +38,13 @@ export default function App() {
     try {
       const saved = localStorage.getItem('portfolio_config_v2');
       if (saved) {
-        return JSON.parse(saved);
+        const parsed = parsePortfolioConfigJson(saved);
+        if (parsed.success) {
+          return parsed.data;
+        }
+        if ('error' in parsed) {
+          console.warn('Ignoring invalid portfolio config from localStorage:', parsed.error);
+        }
       }
     } catch (e) {
       console.error('Failed to load portfolio config from localStorage', e);
@@ -114,6 +119,12 @@ Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [temp
   }, [historyList]);
 
   // Handle Fullscreen
+  useEffect(() => {
+    const syncFullscreenState = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreenState);
+  }, []);
+
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
@@ -481,6 +492,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
     const newItem: TerminalHistoryItem = {
       id: `${Date.now()}-${Math.random()}`,
       command: trimmed,
+      path: currentPath,
       timestamp: time,
       output: {
         type: outputType,
@@ -812,6 +824,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           {splitMode && (
             <div className="w-full md:w-[420px] lg:w-[460px] hidden md:block shrink-0">
               <GuiPreview
+                config={portfolioConfig}
                 theme={currentTheme}
                 onClose={() => setSplitMode(false)}
                 onRunTerminalCommand={executeCommand}

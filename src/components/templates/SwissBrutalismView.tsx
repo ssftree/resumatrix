@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
+import { safeExternalHref } from '../../utils/url';
 
 interface SwissBrutalismViewProps {
   config?: PortfolioConfig;
@@ -223,7 +224,7 @@ export const SwissBrutalismView: React.FC<SwissBrutalismViewProps> = ({
                   <div className="flex items-center gap-4 font-mono text-xs font-bold">
                     {p.githubUrl && (
                       <a
-                        href={p.githubUrl}
+                        href={safeExternalHref(p.githubUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="flex items-center gap-1 hover:underline"
@@ -234,7 +235,7 @@ export const SwissBrutalismView: React.FC<SwissBrutalismViewProps> = ({
                     )}
                     {p.demoUrl && (
                       <a
-                        href={p.demoUrl}
+                        href={safeExternalHref(p.demoUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className={`px-3 py-1 border ${borderClass} flex items-center gap-1.5 hover:opacity-80 transition-opacity`}
@@ -337,17 +338,17 @@ export const SwissBrutalismView: React.FC<SwissBrutalismViewProps> = ({
 
           <div className="flex flex-wrap gap-4 pt-4 border-t border-current font-mono text-xs">
             {contact.github && (
-              <a href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} target="_blank" rel="noreferrer" className="hover:underline">
+              <a href={safeExternalHref(contact.github)} target="_blank" rel="noreferrer" className="hover:underline">
                 GITHUB: {contact.github.replace(/^https?:\/\//, '')}
               </a>
             )}
             {contact.linkedin && (
-              <a href={contact.linkedin.startsWith('http') ? contact.linkedin : `https://${contact.linkedin}`} target="_blank" rel="noreferrer" className="hover:underline">
+              <a href={safeExternalHref(contact.linkedin)} target="_blank" rel="noreferrer" className="hover:underline">
                 LINKEDIN
               </a>
             )}
             {contact.twitter && (
-              <a href={contact.twitter.startsWith('http') ? contact.twitter : `https://${contact.twitter}`} target="_blank" rel="noreferrer" className="hover:underline">
+              <a href={safeExternalHref(contact.twitter)} target="_blank" rel="noreferrer" className="hover:underline">
                 X / TWITTER
               </a>
             )}

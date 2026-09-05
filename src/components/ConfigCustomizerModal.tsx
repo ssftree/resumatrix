@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   X, 
   Download, 
@@ -15,7 +15,9 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { PortfolioConfig } from '../types';
-import { PRESET_CONFIGS, DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
+import { PRESET_CONFIGS } from '../portfolio.config';
+import { useModalA11y } from '../hooks/useModalA11y';
+import { parsePortfolioConfigJson } from '../utils/portfolioConfig';
 
 interface ConfigCustomizerModalProps {
   isOpen: boolean;
@@ -32,6 +34,8 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
   onSaveConfig,
   onResetConfig,
 }) => {
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'skills' | 'experience' | 'json'>('profile');
   const [copied, setCopied] = useState(false);
   const [jsonInput, setJsonInput] = useState(() => JSON.stringify(config, null, 2));
@@ -45,6 +49,13 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
     setDraft(config);
     setJsonInput(JSON.stringify(config, null, 2));
   }, [config]);
+
+  useModalA11y({
+    isOpen,
+    onClose,
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+  });
 
   if (!isOpen) return null;
 
@@ -79,36 +90,31 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      try {
-        const parsed = JSON.parse(event.target?.result as string);
-        if (parsed.profile && parsed.contact && parsed.skills) {
-          setDraft(parsed);
-          setJsonInput(JSON.stringify(parsed, null, 2));
-          onSaveConfig(parsed);
-          setJsonError(null);
-        } else {
-          setJsonError('Invalid config schema. Missing required profile/contact fields.');
-        }
-      } catch (err: any) {
-        setJsonError(`JSON Parse error: ${err.message}`);
+      const result = parsePortfolioConfigJson(event.target?.result as string);
+      if (!result.success) {
+        setJsonError('error' in result ? result.error : 'Invalid portfolio configuration.');
+        return;
       }
+
+      setDraft(result.data);
+      setJsonInput(JSON.stringify(result.data, null, 2));
+      onSaveConfig(result.data);
+      setJsonError(null);
     };
     reader.readAsText(file);
   };
 
   const handleApplyJsonText = () => {
-    try {
-      const parsed = JSON.parse(jsonInput);
-      if (!parsed.profile?.name) {
-        setJsonError('Validation error: profile.name is required.');
-        return;
-      }
-      setDraft(parsed);
-      onSaveConfig(parsed);
-      setJsonError(null);
-    } catch (err: any) {
-      setJsonError(`Invalid JSON format: ${err.message}`);
+    const result = parsePortfolioConfigJson(jsonInput);
+    if (!result.success) {
+      setJsonError('error' in result ? result.error : 'Invalid portfolio configuration.');
+      return;
     }
+
+    setDraft(result.data);
+    setJsonInput(JSON.stringify(result.data, null, 2));
+    onSaveConfig(result.data);
+    setJsonError(null);
   };
 
   const handleProfileFieldChange = (field: keyof typeof draft.profile, val: string) => {
@@ -138,7 +144,11 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
+        ref={dialogRef}
         id="config-customizer-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="config-customizer-title"
         className="w-full max-w-4xl h-[88vh] max-h-[780px] bg-[#161b22] border border-neutral-700 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-neutral-200 font-sans"
       >
         {/* Modal Header */}
@@ -148,20 +158,22 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
+              <h2 id="config-customizer-title" className="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
                 Portfolio Replicator & Config Engine
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-normal border border-emerald-500/30">
                   Live Sync
                 </span>
               </h2>
               <p className="text-xs text-neutral-400">
-                Edit once, instantly replicate across all 4 styles (Terminal, IDE, Bento, LaTeX).
+                Edit once, instantly replicate across all 7 styles.
               </p>
             </div>
           </div>
 
           <button
+            ref={closeButtonRef}
             onClick={onClose}
+            aria-label="Close customizer"
             className="p-1.5 rounded-lg text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -495,7 +507,7 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
         {/* Modal Footer */}
         <div className="px-6 py-3 bg-[#0d1117] border-t border-neutral-800 flex items-center justify-between text-xs font-mono">
           <div className="text-neutral-400 text-[11px]">
-            Ready to deploy? Download <code className="text-emerald-400">portfolio.config.json</code> and place in repository root.
+            Download <code className="text-emerald-400">portfolio.config.json</code> as a backup or transfer file.
           </div>
           <button
             onClick={onClose}

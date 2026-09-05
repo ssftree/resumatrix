@@ -13,16 +13,18 @@ import {
   Briefcase,
   X
 } from 'lucide-react';
-import { CONTACT_DATA, EXPERIENCE_DATA, PROJECTS_DATA, SKILLS_DATA } from '../data/portfolioData';
-import { ThemeConfig } from '../types';
+import { PortfolioConfig, ThemeConfig } from '../types';
+import { safeExternalHref } from '../utils/url';
 
 interface GuiPreviewProps {
+  config: PortfolioConfig;
   theme: ThemeConfig;
   onClose: () => void;
   onRunTerminalCommand: (cmd: string) => void;
 }
 
 export const GuiPreview: React.FC<GuiPreviewProps> = ({
+  config,
   theme,
   onClose,
   onRunTerminalCommand,
@@ -93,7 +95,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold uppercase tracking-wider opacity-70">
-                Featured Works ({PROJECTS_DATA.length})
+                Featured Works ({config.projects.length})
               </span>
               <button
                 onClick={() => onRunTerminalCommand('projects')}
@@ -104,7 +106,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
               </button>
             </div>
 
-            {PROJECTS_DATA.map((p) => (
+            {config.projects.map((p) => (
               <div
                 key={p.id}
                 className="p-3.5 rounded-lg border border-white/10 bg-white/5 space-y-2 hover:border-white/20 transition-colors"
@@ -150,7 +152,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
                   <div className="flex items-center gap-2">
                     {p.githubUrl && (
                       <a
-                        href={p.githubUrl}
+                        href={safeExternalHref(p.githubUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="opacity-70 hover:opacity-100 flex items-center gap-1"
@@ -160,7 +162,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
                     )}
                     {p.demoUrl && (
                       <a
-                        href={p.demoUrl}
+                        href={safeExternalHref(p.demoUrl)}
                         target="_blank"
                         rel="noreferrer"
                         className="opacity-90 hover:opacity-100 flex items-center gap-1 font-semibold"
@@ -191,7 +193,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
               </button>
             </div>
 
-            {SKILLS_DATA.map((cat, i) => (
+            {config.skills.map((cat, i) => (
               <div key={i} className="p-3 rounded-lg border border-white/10 bg-white/5 space-y-2">
                 <span className="font-bold text-xs uppercase" style={{ color: theme.accent }}>
                   {cat.title}
@@ -236,7 +238,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
             </div>
 
             <div className="space-y-4 border-l-2 ml-2 pl-3" style={{ borderColor: theme.border }}>
-              {EXPERIENCE_DATA.map((exp, i) => (
+              {config.experience.map((exp, i) => (
                 <div key={i} className="space-y-1">
                   <span className="font-bold text-xs" style={{ color: theme.accent }}>
                     {exp.role}
@@ -259,27 +261,26 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
                   className="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg"
                   style={{ backgroundColor: theme.accentBg, color: theme.accent }}
                 >
-                  SF
+                  {config.profile.avatarInitials || config.profile.name.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <h4 className="font-bold text-sm">ssfu (Frank)</h4>
-                  <p className="text-xs opacity-70">Full-Stack Software Engineer</p>
+                  <h4 className="font-bold text-sm">{config.profile.name}</h4>
+                  <p className="text-xs opacity-70">{config.profile.title}</p>
                 </div>
               </div>
 
               <p className="text-xs opacity-85 leading-relaxed">
-                Focused on low-latency systems, distributed tools, and modern web applications.
-                Always curious about software engineering fundamentals, performance optimization, and delightful developer experiences.
+                {config.profile.bio}
               </p>
 
               <div className="pt-2 border-t border-white/10 space-y-2 text-xs">
                 <a
-                  href={`mailto:${CONTACT_DATA.email}`}
+                  href={`mailto:${config.contact.email}`}
                   className="p-2 rounded bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-between transition-colors"
                 >
                   <span className="flex items-center gap-2 font-mono">
                     <Mail className="w-3.5 h-3.5" style={{ color: theme.accent }} />
-                    {CONTACT_DATA.email}
+                    {config.contact.email}
                   </span>
                   <span className="text-[10px] uppercase font-bold" style={{ color: theme.accent }}>
                     Email
@@ -288,7 +289,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
 
                 <div className="grid grid-cols-2 gap-2">
                   <a
-                    href={CONTACT_DATA.github}
+                    href={safeExternalHref(config.contact.github)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-2"
@@ -297,7 +298,7 @@ export const GuiPreview: React.FC<GuiPreviewProps> = ({
                     <span className="text-xs">GitHub</span>
                   </a>
                   <a
-                    href={CONTACT_DATA.linkedin}
+                    href={safeExternalHref(config.contact.linkedin)}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-2"

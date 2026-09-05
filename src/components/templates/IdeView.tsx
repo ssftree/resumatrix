@@ -19,14 +19,6 @@ import {
   ExternalLink,
   Code2
 } from 'lucide-react';
-import { 
-  PROJECTS_DATA, 
-  SKILLS_DATA, 
-  EXPERIENCE_DATA, 
-  CONTACT_DATA, 
-  ABOUT_DATA,
-  NEOFETCH_DATA
-} from '../../data/portfolioData';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
 
@@ -53,6 +45,7 @@ export const IdeView: React.FC<IdeViewProps> = ({ onSwitchTemplate, config = DEF
   const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
   const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
   const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+  const system = config.system || DEFAULT_PORTFOLIO_CONFIG.system;
 
   const [activeFileId, setActiveFileId] = useState<FileId>('profile');
   const [openFiles, setOpenFiles] = useState<FileId[]>(['profile', 'experience', 'projects', 'config']);
@@ -275,7 +268,7 @@ DEV_AVAILABILITY="${profile.status}"`,
           </div>
           <Code2 className="w-4 h-4 text-blue-400" />
           <span className="text-xs text-neutral-300 font-medium">
-            ssfu-portfolio — {activeFile.path} — Visual Studio Code
+            {profile.name.toLowerCase().replace(/\s+/g, '-')}-portfolio — {activeFile.path} — Visual Studio Code
           </span>
         </div>
 
@@ -334,7 +327,7 @@ DEV_AVAILABILITY="${profile.status}"`,
         <div className="w-64 bg-[#252526] border-r border-[#1e1e1e] flex flex-col select-none">
           <div className="px-4 py-2.5 text-xs uppercase font-bold tracking-wider text-neutral-400 flex items-center justify-between border-b border-[#333333]">
             <span>Explorer</span>
-            <span className="text-[10px] text-neutral-500 font-normal">SSFU-WORKSPACE</span>
+            <span className="text-[10px] text-neutral-500 font-normal">{profile.name.toUpperCase()}-WORKSPACE</span>
           </div>
 
           <div className="p-2 border-b border-[#333333]">
@@ -409,11 +402,11 @@ DEV_AVAILABILITY="${profile.status}"`,
 
           {/* Mini Author Card */}
           <div className="p-3 bg-[#1e1e1e] border-t border-[#333333] text-xs">
-            <div className="font-semibold text-neutral-200">{ABOUT_DATA.name}</div>
-            <div className="text-neutral-400 text-[11px] truncate">{ABOUT_DATA.title}</div>
+            <div className="font-semibold text-neutral-200">{profile.name}</div>
+            <div className="text-neutral-400 text-[11px] truncate">{profile.title}</div>
             <div className="text-emerald-400 text-[10px] mt-1 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Open to Opportunities
+              {profile.status}
             </div>
           </div>
         </div>
@@ -497,15 +490,15 @@ DEV_AVAILABILITY="${profile.status}"`,
               </div>
               <div className="p-3 text-neutral-300 overflow-y-auto flex-1 space-y-1">
                 <div className="text-neutral-500">Last login: {new Date().toLocaleDateString()} on ttys002</div>
-                <div className="text-emerald-400">ssfu@portfolio ~ % neofetch --short</div>
+                <div className="text-emerald-400">{profile.name.toLowerCase().replace(/\s+/g, '-')}@portfolio ~ % neofetch --short</div>
                 <div className="text-neutral-300">
-                  OS: {NEOFETCH_DATA.os} | Host: {NEOFETCH_DATA.host} | Kernel: {NEOFETCH_DATA.kernel}
+                  OS: {system?.os || 'Unknown'} | Host: {system?.host || 'Unknown'} | Kernel: {system?.kernel || 'Unknown'}
                 </div>
                 <div className="text-neutral-400">
-                  Uptime: {NEOFETCH_DATA.uptime} | Shell: zsh 5.9 | Status: Available for hire
+                  Uptime: {system?.uptime || 'Unknown'} | Shell: {system?.shell || 'Unknown'} | Status: {profile.status}
                 </div>
                 <div className="text-emerald-400 flex items-center gap-1.5 mt-2">
-                  <span>ssfu@portfolio ~ %</span>
+                  <span>{profile.name.toLowerCase().replace(/\s+/g, '-')}@portfolio ~ %</span>
                   <span className="w-2 h-4 bg-emerald-400 animate-pulse inline-block" />
                 </div>
               </div>
