@@ -219,6 +219,9 @@ export const DEFAULT_PORTFOLIO_CONFIG: PortfolioConfig = {
       notes: 'Focus on Distributed Systems, Operating Systems, Algorithm Complexity, and Network Protocols. Outstanding Graduate Thesis Award.',
     },
   ],
+  terminal: {
+    easterEggsEnabled: true,
+  },
   system: {
     os: 'DevOS v2.5 (x86_64)',
     host: 'ThinkPad X1 Carbon Gen 11',

@@ -21,4 +21,22 @@ describe('TerminalOutput command prompt', () => {
 
     expect(html).toContain('>~/secrets</span>');
   });
+
+  it('discovers both easter egg commands from help when enabled', () => {
+    const html = renderToStaticMarkup(
+      <TerminalOutput
+        item={{
+          id: 'help',
+          command: 'help',
+          timestamp: '12:00:00',
+          output: { type: 'help' },
+        }}
+        theme={THEMES.matrix}
+        onExecuteCommand={vi.fn()}
+      />,
+    );
+
+    expect(html).toContain('sudo hire me');
+    expect(html).toContain('rps [move]');
+  });
 });

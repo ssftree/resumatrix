@@ -8,6 +8,7 @@ interface TerminalInputProps {
   onSubmit: (command: string) => void;
   onClear: () => void;
   availableFiles?: string[];
+  easterEggsEnabled?: boolean;
 }
 
 const COMMON_COMMANDS = [
@@ -26,6 +27,7 @@ const COMMON_COMMANDS = [
   'crt',
   'sound',
   'clear',
+  'rps',
 ];
 
 export const TerminalInput: React.FC<TerminalInputProps> = ({
@@ -34,6 +36,7 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
   onSubmit,
   onClear,
   availableFiles = [],
+  easterEggsEnabled = true,
 }) => {
   const [inputVal, setInputVal] = useState('');
   const [history, setHistory] = useState<string[]>([]);
@@ -110,7 +113,8 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
       if (parts.length === 1) {
         // Complete command
         const prefix = parts[0].toLowerCase();
-        const matches = COMMON_COMMANDS.filter((c) => c.startsWith(prefix));
+        const commands = easterEggsEnabled ? COMMON_COMMANDS : COMMON_COMMANDS.filter((c) => c !== 'rps');
+        const matches = commands.filter((c) => c.startsWith(prefix));
         if (matches.length === 1) {
           setInputVal(matches[0] + ' ');
         } else if (matches.length > 1) {
@@ -126,6 +130,8 @@ export const TerminalInput: React.FC<TerminalInputProps> = ({
           if (matchedFiles.length === 1) {
             setInputVal(`${cmd} ${matchedFiles[0]}`);
           }
+        } else if (easterEggsEnabled && cmd === 'sudo' && 'hire me'.startsWith(parts.slice(1).join(' ').toLowerCase())) {
+          setInputVal('sudo hire me');
         }
       }
     }

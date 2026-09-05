@@ -206,6 +206,36 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                   </div>
                 </div>
               </div>
+
+              {config.terminal?.easterEggsEnabled !== false && (
+                <div className="p-3 rounded border border-white/10 space-y-2 bg-white/5 md:col-span-2">
+                  <span className="text-xs uppercase font-bold tracking-wider opacity-70" style={{ color: theme.accent }}>
+                    Easter Eggs
+                  </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-1 font-mono text-xs">
+                    <div className="flex items-start">
+                      <button
+                        onClick={() => onExecuteCommand('sudo hire me')}
+                        className="hover:underline font-bold text-left cursor-pointer w-36 shrink-0"
+                        style={{ color: theme.accent }}
+                      >
+                        sudo hire me
+                      </button>
+                      <span className="opacity-80 text-neutral-300">Run the recruiter privilege check</span>
+                    </div>
+                    <div className="flex items-start">
+                      <button
+                        onClick={() => onExecuteCommand('rps rock')}
+                        className="hover:underline font-bold text-left cursor-pointer w-36 shrink-0"
+                        style={{ color: theme.accent }}
+                      >
+                        rps [move]
+                      </button>
+                      <span className="opacity-80 text-neutral-300">Play rock, paper, scissors</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="p-2.5 rounded border border-white/10 bg-white/5 flex flex-wrap items-center gap-2 text-xs">

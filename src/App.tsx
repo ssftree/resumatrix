@@ -162,6 +162,7 @@ Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [temp
     let outputType: TerminalHistoryItem['output']['type'] = 'text';
     let outputContent = '';
     let outputData: any = null;
+    const easterEggsEnabled = portfolioConfig.terminal?.easterEggsEnabled !== false;
 
     switch (cmd) {
       case 'help':
@@ -471,10 +472,47 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           .join('\n');
         break;
 
+      case 'rps': {
+        if (!easterEggsEnabled) {
+          outputType = 'error';
+          outputContent = 'Terminal easter eggs are disabled in this portfolio configuration.';
+          break;
+        }
+        const playerMove = arg.toLowerCase();
+        const moves = ['rock', 'paper', 'scissors'] as const;
+        if (!moves.includes(playerMove as (typeof moves)[number])) {
+          outputType = 'error';
+          outputContent = 'Usage: rps <rock|paper|scissors>';
+          break;
+        }
+        const terminalMove = moves[Math.floor(Math.random() * moves.length)];
+        const playerWins =
+          (playerMove === 'rock' && terminalMove === 'scissors') ||
+          (playerMove === 'paper' && terminalMove === 'rock') ||
+          (playerMove === 'scissors' && terminalMove === 'paper');
+        const result = playerMove === terminalMove ? 'Draw' : playerWins ? 'You win' : 'Terminal wins';
+        outputContent = `You: ${playerMove} | Terminal: ${terminalMove}\nResult: ${result}`;
+        break;
+      }
+
       case 'sudo':
-        outputType = 'error';
-        soundEngine.playError();
-        outputContent = `guest is not in the sudoers file. This incident will be reported to ssfu.`;
+        if (arg.toLowerCase() === 'hire me') {
+          if (!easterEggsEnabled) {
+            outputType = 'error';
+            outputContent = 'Terminal easter eggs are disabled in this portfolio configuration.';
+            break;
+          }
+          outputContent = `╭─ PRIVILEGE ESCALATION GRANTED ─────────────────────╮
+│ Candidate : ${portfolioConfig.profile.name}
+│ Role      : ${portfolioConfig.profile.title}
+│ Status    : ${portfolioConfig.profile.status}
+│ Next step : mailto:${portfolioConfig.contact.email}
+╰─ Ready to ship. No root access required. ──────────╯`;
+        } else {
+          outputType = 'error';
+          soundEngine.playError();
+          outputContent = `guest is not in the sudoers file. This incident will be reported to ssfu.`;
+        }
         break;
 
       case 'clear':
@@ -814,6 +852,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
                 onSubmit={executeCommand}
                 onClear={handleClear}
                 availableFiles={getCurrentDirectoryFiles()}
+                easterEggsEnabled={portfolioConfig.terminal?.easterEggsEnabled !== false}
               />
 
               <div ref={terminalEndRef} />
