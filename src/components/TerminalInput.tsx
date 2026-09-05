@@ -22,6 +22,7 @@ const COMMON_COMMANDS = [
   'cat',
   'resume',
   'theme',
+  'template',
   'matrix',
   'crt',
   'sound',

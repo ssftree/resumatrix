@@ -7,6 +7,7 @@ import {
   SlidersHorizontal,
   Monitor,
   Activity,
+  GitBranch,
   Square
 } from 'lucide-react';
 import { AppTemplate } from '../types';
@@ -52,6 +53,12 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
       label: 'Telemetry',
       icon: <Activity className="w-3.5 h-3.5" />,
       badge: 'Grafana',
+    },
+    {
+      id: 'devops',
+      label: 'DevOps Control',
+      icon: <GitBranch className="w-3.5 h-3.5" />,
+      badge: 'CI/CD',
     },
     {
       id: 'brutalism',
