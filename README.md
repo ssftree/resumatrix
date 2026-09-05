@@ -109,25 +109,25 @@ npm run build
 
 Deploy `dist/` to any static hosting service. The site has no client-side routing, so no extra SPA rewrite rules are needed.
 
-### 一键部署
+### One-Click Deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ssftree/terminal-website)
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ssftree/terminal-website)
 
-- **Vercel**：点击按钮后会提示登录并将仓库导入你自己的账号，`vercel.json` 已声明 `npm run build` 与 `dist` 输出目录，Vercel 会自动识别 Vite 框架。
-- **Cloudflare**：点击按钮后会提示登录 Cloudflare 并授权 GitHub，随后按 `wrangler.jsonc` 中的 `assets` 配置将 `dist` 部署为一个纯静态资源 Worker；`package.json` 中的 `deploy` 脚本（`vite build && wrangler deploy`）会在部署前自动构建。
+- **Vercel**: clicking the button prompts you to sign in and import the repository into your own account. `vercel.json` already declares the `npm run build` command and `dist` output directory, and Vercel auto-detects the Vite framework.
+- **Cloudflare**: clicking the button prompts you to sign in to Cloudflare and authorize GitHub, then deploys `dist` as a static-assets Worker per the `assets` config in `wrangler.jsonc`; the `deploy` script in `package.json` (`vite build && wrangler deploy`) builds automatically before deploying.
 
-两个按钮都需要你在浏览器中用自己的账号完成登录和授权，因此实际部署由你本人触发；也可以在本地先登录后手动运行：
+Both buttons require you to sign in and authorize with your own account in the browser, so the actual deployment is triggered by you. You can also sign in locally beforehand and run it manually:
 
 ```bash
-# Vercel（需先 npm i -g vercel 并 vercel login）
+# Vercel (requires npm i -g vercel and vercel login first)
 vercel --prod
 
-# Cloudflare（需先 npx wrangler login）
+# Cloudflare (requires npx wrangler login first)
 npm run deploy
 ```
 
-上线前建议补充（Before going live, consider adding）：
+Before going live, consider adding:
 
 - Open Graph/Twitter share images and corresponding meta tags
 - A canonical URL for the real domain

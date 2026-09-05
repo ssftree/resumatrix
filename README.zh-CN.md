@@ -109,6 +109,24 @@ npm run build
 
 将 `dist/` 部署到任意静态托管服务即可。站点没有客户端路由，因此不需要额外的 SPA rewrite 规则。
 
+### 一键部署
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ssftree/terminal-website)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ssftree/terminal-website)
+
+- **Vercel**：点击按钮后会提示登录并将仓库导入你自己的账号，`vercel.json` 已声明 `npm run build` 与 `dist` 输出目录，Vercel 会自动识别 Vite 框架。
+- **Cloudflare**：点击按钮后会提示登录 Cloudflare 并授权 GitHub，随后按 `wrangler.jsonc` 中的 `assets` 配置将 `dist` 部署为一个纯静态资源 Worker；`package.json` 中的 `deploy` 脚本（`vite build && wrangler deploy`）会在部署前自动构建。
+
+两个按钮都需要你在浏览器中用自己的账号完成登录和授权，因此实际部署由你本人触发；也可以在本地先登录后手动运行：
+
+```bash
+# Vercel（需先 npm i -g vercel 并 vercel login）
+vercel --prod
+
+# Cloudflare（需先 npx wrangler login）
+npm run deploy
+```
+
 上线前建议补充：
 
 - Open Graph/Twitter 分享图片及对应 meta 标签
