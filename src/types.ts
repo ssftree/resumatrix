@@ -43,6 +43,51 @@ export interface ContactInfo {
   location: string;
 }
 
+export interface DeveloperProfile {
+  name: string;
+  title: string;
+  location: string;
+  status: string;
+  bio: string;
+  avatarInitials?: string;
+  yearsOfExperience?: string;
+  stats?: {
+    metric: string;
+    label: string;
+  }[];
+}
+
+export interface EducationItem {
+  degree: string;
+  field: string;
+  institution: string;
+  location: string;
+  period: string;
+  notes?: string;
+}
+
+export interface PortfolioConfig {
+  version: string;
+  profile: DeveloperProfile;
+  contact: ContactInfo;
+  skills: SkillCategory[];
+  experience: Experience[];
+  projects: Project[];
+  education?: EducationItem[];
+  system?: {
+    os?: string;
+    host?: string;
+    kernel?: string;
+    uptime?: string;
+    shell?: string;
+    resolution?: string;
+    wm?: string;
+    terminal?: string;
+    cpu?: string;
+    memory?: string;
+  };
+}
+
 export interface VirtualFile {
   name: string;
   type: 'file' | 'dir';

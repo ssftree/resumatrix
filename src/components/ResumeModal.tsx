@@ -1,16 +1,28 @@
 import React from 'react';
 import { X, Printer, Download, Mail, ExternalLink, MapPin, Briefcase, GraduationCap, Code } from 'lucide-react';
-import { CONTACT_DATA, EXPERIENCE_DATA, PROJECTS_DATA, SKILLS_DATA } from '../data/portfolioData';
-import { ThemeConfig } from '../types';
+import { PortfolioConfig, ThemeConfig } from '../types';
+import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
 
 interface ResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
   theme: ThemeConfig;
+  config?: PortfolioConfig;
 }
 
-export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme }) => {
+export const ResumeModal: React.FC<ResumeModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  theme,
+  config = DEFAULT_PORTFOLIO_CONFIG,
+}) => {
   if (!isOpen) return null;
+
+  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
+  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
+  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
+  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+  const education = config.education || DEFAULT_PORTFOLIO_CONFIG.education;
 
   const handlePrint = () => {
     window.print();
@@ -33,7 +45,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
         >
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <h2 className="font-bold text-sm sm:text-base">Curriculum Vitae — ssfu.dev</h2>
+            <h2 className="font-bold text-sm sm:text-base">Curriculum Vitae — {profile.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -57,25 +69,29 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
           <div className="border-b pb-6 space-y-2" style={{ borderColor: theme.border }}>
             <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2">
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: theme.accent }}>
-                Frank (ssfu)
+                {profile.name}
               </h1>
               <span className="text-xs font-mono opacity-80 flex items-center gap-1">
-                <MapPin className="w-3 h-3" /> {CONTACT_DATA.location}
+                <MapPin className="w-3 h-3" /> {contact.location}
               </span>
             </div>
             <p className="text-sm font-medium opacity-90">
-              Senior Full-Stack Engineer & Systems Enthusiast
+              {profile.title}
             </p>
             <div className="flex flex-wrap gap-4 text-xs font-mono pt-1 opacity-80">
-              <a href={`mailto:${CONTACT_DATA.email}`} className="hover:underline flex items-center gap-1">
-                <Mail className="w-3 h-3" /> {CONTACT_DATA.email}
+              <a href={`mailto:${contact.email}`} className="hover:underline flex items-center gap-1">
+                <Mail className="w-3 h-3" /> {contact.email}
               </a>
-              <a href={CONTACT_DATA.github} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
-                GitHub: ssfu-dev
-              </a>
-              <a href={CONTACT_DATA.blog} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
-                Portfolio: ssfu.dev
-              </a>
+              {contact.github && (
+                <a href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                  GitHub
+                </a>
+              )}
+              {contact.blog && (
+                <a href={contact.blog.startsWith('http') ? contact.blog : `https://${contact.blog}`} target="_blank" rel="noreferrer" className="hover:underline flex items-center gap-1">
+                  Website: {contact.blog.replace(/^https?:\/\//, '')}
+                </a>
+              )}
             </div>
           </div>
 
@@ -85,9 +101,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
               Professional Summary
             </h3>
             <p className="leading-relaxed opacity-90 text-sm">
-              Full-Stack Software Engineer with 6+ years of engineering experience across high-performance
-              web architecture, distributed Node.js/Go backend infrastructure, and low-latency systems in Rust.
-              Track record of building developer tooling, GPU-accelerated interfaces, and mission-critical cloud pipelines.
+              {profile.bio}
             </p>
           </div>
 
@@ -97,7 +111,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
               <Briefcase className="w-3.5 h-3.5" /> Work Experience
             </h3>
             <div className="space-y-5">
-              {EXPERIENCE_DATA.map((exp, idx) => (
+              {experience.map((exp, idx) => (
                 <div key={idx} className="space-y-1.5">
                   <div className="flex flex-col sm:flex-row sm:items-baseline justify-between">
                     <span className="font-bold text-sm">{exp.role}</span>
@@ -120,10 +134,10 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
           {/* Featured Projects */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider font-mono opacity-70 flex items-center gap-1.5" style={{ color: theme.accent }}>
-              <Code className="w-3.5 h-3.5" /> Selected Open-Source & Projects
+              <Code className="w-3.5 h-3.5" /> Selected Projects
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {PROJECTS_DATA.slice(0, 4).map((p) => (
+              {projects.slice(0, 4).map((p) => (
                 <div key={p.id} className="p-3 rounded-lg border border-white/10 bg-black/20 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs" style={{ color: theme.accent }}>{p.title}</span>
@@ -143,16 +157,25 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, theme
           </div>
 
           {/* Education */}
-          <div className="space-y-2 border-t pt-4" style={{ borderColor: theme.border }}>
-            <h3 className="text-xs font-bold uppercase tracking-wider font-mono opacity-70 flex items-center gap-1.5" style={{ color: theme.accent }}>
-              <GraduationCap className="w-3.5 h-3.5" /> Education
-            </h3>
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between text-xs">
-              <span className="font-bold">B.S. in Computer Science & Technology</span>
-              <span className="font-mono opacity-70">2015 – 2019</span>
+          {education && education.length > 0 && (
+            <div className="space-y-3 border-t pt-4" style={{ borderColor: theme.border }}>
+              <h3 className="text-xs font-bold uppercase tracking-wider font-mono opacity-70 flex items-center gap-1.5" style={{ color: theme.accent }}>
+                <GraduationCap className="w-3.5 h-3.5" /> Education
+              </h3>
+              {education.map((edu, eIdx) => (
+                <div key={eIdx} className="space-y-1">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between text-xs">
+                    <span className="font-bold">{edu.degree} in {edu.field}</span>
+                    <span className="font-mono opacity-70">{edu.period}</span>
+                  </div>
+                  <div className="text-xs opacity-80 font-medium" style={{ color: theme.accent }}>
+                    {edu.institution} • {edu.location}
+                  </div>
+                  {edu.notes && <p className="text-xs opacity-75">{edu.notes}</p>}
+                </div>
+              ))}
             </div>
-            <p className="text-xs opacity-75">Graduated with Honors • Focus on Distributed Systems & Graphics</p>
-          </div>
+          )}
         </div>
       </div>
     </div>

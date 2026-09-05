@@ -18,16 +18,12 @@ import {
   Layers,
   Award
 } from 'lucide-react';
-import { TerminalHistoryItem, ThemeConfig, ThemeKey } from '../types';
+import { TerminalHistoryItem, ThemeConfig, ThemeKey, PortfolioConfig } from '../types';
 import { 
   ASCII_BANNER, 
-  CONTACT_DATA, 
-  EXPERIENCE_DATA, 
-  NEOFETCH_ART, 
-  PROJECTS_DATA, 
-  SKILLS_DATA, 
-  SYSTEM_INFO 
+  NEOFETCH_ART 
 } from '../data/portfolioData';
+import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
 import { THEMES } from '../utils/themes';
 
 interface TerminalOutputProps {
@@ -35,6 +31,7 @@ interface TerminalOutputProps {
   theme: ThemeConfig;
   onExecuteCommand: (cmd: string) => void;
   onOpenResumeModal?: () => void;
+  config?: PortfolioConfig;
 }
 
 export const TerminalOutput: React.FC<TerminalOutputProps> = ({
@@ -42,8 +39,16 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
   theme,
   onExecuteCommand,
   onOpenResumeModal,
+  config = DEFAULT_PORTFOLIO_CONFIG,
 }) => {
   const [copied, setCopied] = useState(false);
+
+  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
+  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
+  const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
+  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
+  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+  const system = config.system || DEFAULT_PORTFOLIO_CONFIG.system;
 
   const handleCopyText = (text: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -230,21 +235,21 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               {/* Specs */}
               <div className="space-y-1 flex-1">
                 <div className="font-bold text-base pb-1 border-b border-white/10 flex items-center gap-2">
-                  <span style={{ color: theme.promptUser }}>ssfu</span>
+                  <span style={{ color: theme.promptUser }}>{profile.name.toLowerCase().replace(/\s+/g, '')}</span>
                   <span className="opacity-60">@</span>
                   <span style={{ color: theme.promptHost }}>devbox</span>
                 </div>
                 <div className="pt-1 space-y-1">
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>OS:</span> <span className="opacity-90">{SYSTEM_INFO.os}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Host:</span> <span className="opacity-90">{SYSTEM_INFO.host}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Kernel:</span> <span className="opacity-90">{SYSTEM_INFO.kernel}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Uptime:</span> <span className="opacity-90">{SYSTEM_INFO.uptime}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Shell:</span> <span className="opacity-90">{SYSTEM_INFO.shell}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Resolution:</span> <span className="opacity-90">{SYSTEM_INFO.resolution}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>WM:</span> <span className="opacity-90">{SYSTEM_INFO.wm}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Terminal:</span> <span className="opacity-90">{SYSTEM_INFO.terminal}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>CPU:</span> <span className="opacity-90">{SYSTEM_INFO.cpu}</span></div>
-                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Memory:</span> <span className="opacity-90">{SYSTEM_INFO.memory}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>OS:</span> <span className="opacity-90">{system.os}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Host:</span> <span className="opacity-90">{system.host}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Kernel:</span> <span className="opacity-90">{system.kernel}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Uptime:</span> <span className="opacity-90">{system.uptime}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Shell:</span> <span className="opacity-90">{system.shell}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Resolution:</span> <span className="opacity-90">{system.resolution}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>WM:</span> <span className="opacity-90">{system.wm}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Terminal:</span> <span className="opacity-90">{system.terminal}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>CPU:</span> <span className="opacity-90">{system.cpu}</span></div>
+                  <div className="flex"><span className="w-24 font-bold" style={{ color: theme.accent }}>Memory:</span> <span className="opacity-90">{system.memory}</span></div>
                 </div>
 
                 {/* Color blocks */}
@@ -265,32 +270,31 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               <div className="flex items-center justify-between flex-wrap gap-2 border-b border-white/10 pb-3">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-md flex items-center justify-center font-bold text-base" style={{ backgroundColor: theme.accentBg, color: theme.accent }}>
-                    SF
+                    {profile.avatarInitials || profile.name.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm sm:text-base">ssfu (Frank)</h3>
-                    <p className="text-xs opacity-70">Senior Full-Stack Engineer & Systems Enthusiast</p>
+                    <h3 className="font-bold text-sm sm:text-base">{profile.name}</h3>
+                    <p className="text-xs opacity-70">{profile.title}</p>
                   </div>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-xs font-medium border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Available for Select Projects
+                  {profile.status}
                 </span>
               </div>
 
               <p className="leading-relaxed opacity-90 text-sm">
-                Hey there! I am a full-stack engineer passionate about crafting low-latency developer tools, 
-                high-performance web architectures, and engaging interactive experiences.
+                {profile.bio}
               </p>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs pt-1">
                 <div className="p-2 rounded bg-black/20 border border-white/5">
-                  <span className="font-semibold block mb-1" style={{ color: theme.accent }}>🚀 What I Build</span>
-                  <span className="opacity-80">Distributed backend services, GPU-accelerated web UIs, vector indexers, and modern developer CLI tools.</span>
+                  <span className="font-semibold block mb-1" style={{ color: theme.accent }}>🚀 Location & Experience</span>
+                  <span className="opacity-80">{profile.location} • {profile.yearsOfExperience || '10+ Years of Experience'}</span>
                 </div>
                 <div className="p-2 rounded bg-black/20 border border-white/5">
                   <span className="font-semibold block mb-1" style={{ color: theme.accent }}>🎯 Engineering Ethos</span>
-                  <span className="opacity-80">Speed by default, zero clutter, robust type systems, and software craftsmanship with empathetic UX.</span>
+                  <span className="opacity-80">Speed by default, zero clutter, robust type systems, and software craftsmanship.</span>
                 </div>
               </div>
 
@@ -320,7 +324,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               Technical Capabilities & Proficiency
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-              {SKILLS_DATA.map((cat, idx) => (
+              {skills.map((cat, idx) => (
                 <div key={idx} className="p-3 rounded-lg border border-white/10 bg-white/5 space-y-2.5">
                   <div className="flex items-center justify-between border-b border-white/10 pb-1.5">
                     <span className="font-bold text-xs uppercase tracking-wider" style={{ color: theme.accent }}>
@@ -362,13 +366,13 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
           <div className="my-3 space-y-3 text-xs sm:text-sm">
             <div className="flex items-center justify-between">
               <p className="font-semibold" style={{ color: theme.highlight }}>
-                Featured Engineering Projects ({PROJECTS_DATA.length})
+                Featured Engineering Projects ({projects.length})
               </p>
               <span className="text-xs opacity-60">Click a project to view case details</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {PROJECTS_DATA.map((p) => (
+              {projects.map((p) => (
                 <div
                   key={p.id}
                   className="p-3.5 rounded-lg border border-white/10 bg-white/5 hover:border-white/20 transition-all space-y-2.5 group"
@@ -451,7 +455,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
             </div>
 
             <p className="text-xs opacity-60 text-center pt-1">
-              Tip: Type <code className="px-1 py-0.5 rounded bg-white/10">project &lt;name&gt;</code> (e.g. <code className="px-1 py-0.5 rounded bg-white/10 cursor-pointer" onClick={() => onExecuteCommand('project hypershell')}>project hypershell</code>)
+              Tip: Type <code className="px-1 py-0.5 rounded bg-white/10">project &lt;name&gt;</code> (e.g. <code className="px-1 py-0.5 rounded bg-white/10 cursor-pointer" onClick={() => onExecuteCommand(`project ${projects[0]?.id || 'hypershell'}`)}>project {projects[0]?.id || 'hypershell'}</code>)
             </p>
           </div>
         );
@@ -463,7 +467,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
               Career Milestones & Experience
             </p>
             <div className="border-l-2 ml-2 pl-4 space-y-5" style={{ borderColor: theme.border }}>
-              {EXPERIENCE_DATA.map((exp, i) => (
+              {experience.map((exp, i) => (
                 <div key={i} className="relative group">
                   <span
                     className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full border-2 border-black"
@@ -516,18 +520,18 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                 <div className="flex items-center justify-between p-2 rounded bg-black/20 border border-white/5">
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4" style={{ color: theme.accent }} />
-                    <span className="font-medium">{CONTACT_DATA.email}</span>
+                    <span className="font-medium">{contact.email}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => handleCopyText(CONTACT_DATA.email)}
+                      onClick={() => handleCopyText(contact.email)}
                       className="px-2 py-1 rounded text-xs border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-1 cursor-pointer"
                     >
                       {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                       {copied ? 'Copied' : 'Copy'}
                     </button>
                     <a
-                      href={`mailto:${CONTACT_DATA.email}`}
+                      href={`mailto:${contact.email}`}
                       className="px-2 py-1 rounded text-xs font-semibold hover:opacity-90 transition-opacity"
                       style={{ backgroundColor: theme.accent, color: theme.bg }}
                     >
@@ -538,7 +542,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                   <a
-                    href={CONTACT_DATA.github}
+                    href={contact.github.startsWith('http') ? contact.github : `https://${contact.github}`}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -547,7 +551,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <span className="text-[11px] font-semibold">GitHub</span>
                   </a>
                   <a
-                    href={CONTACT_DATA.linkedin}
+                    href={contact.linkedin.startsWith('http') ? contact.linkedin : `https://${contact.linkedin}`}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -556,7 +560,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <span className="text-[11px] font-semibold">LinkedIn</span>
                   </a>
                   <a
-                    href={CONTACT_DATA.twitter}
+                    href={contact.twitter.startsWith('http') ? contact.twitter : `https://${contact.twitter}`}
                     target="_blank"
                     rel="noreferrer"
                     className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
@@ -564,15 +568,17 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     <Twitter className="w-4 h-4" />
                     <span className="text-[11px] font-semibold">Twitter/X</span>
                   </a>
-                  <a
-                    href={CONTACT_DATA.blog}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span className="text-[11px] font-semibold">Blog</span>
-                  </a>
+                  {contact.blog && (
+                    <a
+                      href={contact.blog.startsWith('http') ? contact.blog : `https://${contact.blog}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="p-2 rounded border border-white/10 bg-white/5 hover:bg-white/10 transition-colors flex flex-col items-center gap-1 text-center"
+                    >
+                      <Globe className="w-4 h-4" />
+                      <span className="text-[11px] font-semibold">Blog</span>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>

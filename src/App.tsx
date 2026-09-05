@@ -16,18 +16,53 @@ import {
   PROJECTS_DATA, 
   VIRTUAL_FILESYSTEM 
 } from './data/portfolioData';
-import { TerminalHistoryItem, ThemeConfig, ThemeKey, AppTemplate } from './types';
+import { TerminalHistoryItem, ThemeConfig, ThemeKey, AppTemplate, PortfolioConfig } from './types';
 import { THEMES } from './utils/themes';
 import { soundEngine } from './utils/sound';
 import { TemplateSwitcher } from './components/TemplateSwitcher';
 import { IdeView } from './components/templates/IdeView';
 import { BentoView } from './components/templates/BentoView';
 import { AcademicView } from './components/templates/AcademicView';
+import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
+import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
 
 export default function App() {
   const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>('terminal');
   const [themeKey, setThemeKey] = useState<ThemeKey>('matrix');
   const currentTheme: ThemeConfig = THEMES[themeKey];
+
+  // Portfolio data-driven config state with localStorage persistence
+  const [portfolioConfig, setPortfolioConfig] = useState<PortfolioConfig>(() => {
+    try {
+      const saved = localStorage.getItem('portfolio_config_v2');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch (e) {
+      console.error('Failed to load portfolio config from localStorage', e);
+    }
+    return DEFAULT_PORTFOLIO_CONFIG;
+  });
+
+  const [configModalOpen, setConfigModalOpen] = useState<boolean>(false);
+
+  const handleSaveConfig = (newConfig: PortfolioConfig) => {
+    setPortfolioConfig(newConfig);
+    try {
+      localStorage.setItem('portfolio_config_v2', JSON.stringify(newConfig));
+    } catch (e) {
+      console.error('Failed to persist portfolio config to localStorage', e);
+    }
+  };
+
+  const handleResetConfig = () => {
+    setPortfolioConfig(DEFAULT_PORTFOLIO_CONFIG);
+    try {
+      localStorage.removeItem('portfolio_config_v2');
+    } catch (e) {
+      console.error('Failed to reset config in localStorage', e);
+    }
+  };
 
   const [crtEnabled, setCrtEnabled] = useState<boolean>(true);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(false);
@@ -141,7 +176,7 @@ Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [temp
         if (!arg) {
           outputType = 'projects';
         } else {
-          const match = PROJECTS_DATA.find(
+          const match = portfolioConfig.projects.find(
             (p) => p.id.toLowerCase() === arg.toLowerCase() || p.title.toLowerCase().includes(arg.toLowerCase())
           );
           if (match) {
@@ -258,8 +293,33 @@ ${match.highlights.map((h) => `│  • ${h}`).join('\n')}
 
       case 'pwd':
         outputType = 'text';
-        outputContent = `/home/ssfu/${currentPath === '~' ? '' : 'secrets'}`;
+        outputContent = `/home/${portfolioConfig.profile.name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'}/${currentPath === '~' ? '' : 'secrets'}`;
         break;
+
+      case 'config':
+      case 'customize':
+      case 'profile-edit': {
+        if (arg === 'reset') {
+          handleResetConfig();
+          outputType = 'success';
+          outputContent = `Reset portfolio configuration to default Frank (ssfu) preset.`;
+        } else if (arg === 'export') {
+          const blob = new Blob([JSON.stringify(portfolioConfig, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `portfolio.config.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          outputType = 'success';
+          outputContent = `Exported portfolio.config.json to browser downloads!`;
+        } else {
+          setConfigModalOpen(true);
+          outputType = 'success';
+          outputContent = `Opening Portfolio Config Customizer...\nYou can edit personal info, technical skills, projects, and career milestones, switch presets, or export/import JSON.`;
+        }
+        break;
+      }
 
       case 'theme': {
         const themeArgs = Object.keys(THEMES) as ThemeKey[];
@@ -430,11 +490,22 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
           <TemplateSwitcher
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
           />
         </div>
         <div className="max-w-7xl mx-auto w-full pt-10 sm:pt-2">
-          <IdeView onSwitchTemplate={setCurrentTemplate} />
+          <IdeView 
+            config={portfolioConfig}
+            onSwitchTemplate={setCurrentTemplate} 
+          />
         </div>
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
       </div>
     );
   }
@@ -447,10 +518,12 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
           <TemplateSwitcher
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
           />
         </div>
         <div className="pt-10 sm:pt-4">
           <BentoView 
+            config={portfolioConfig}
             onSwitchTemplate={setCurrentTemplate} 
             onOpenResumeModal={() => setResumeOpen(true)} 
           />
@@ -459,6 +532,14 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
           isOpen={resumeOpen}
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
+          config={portfolioConfig}
+        />
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
         />
       </div>
     );
@@ -472,11 +553,22 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
           <TemplateSwitcher
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
           />
         </div>
         <div className="pt-10 sm:pt-4">
-          <AcademicView onSwitchTemplate={setCurrentTemplate} />
+          <AcademicView 
+            config={portfolioConfig}
+            onSwitchTemplate={setCurrentTemplate} 
+          />
         </div>
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
       </div>
     );
   }
@@ -494,6 +586,7 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
         <TemplateSwitcher
           currentTemplate={currentTemplate}
           onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+          onOpenCustomizer={() => setConfigModalOpen(true)}
         />
       </div>
 
@@ -509,6 +602,16 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
         isOpen={resumeOpen}
         onClose={() => setResumeOpen(false)}
         theme={currentTheme}
+        config={portfolioConfig}
+      />
+
+      {/* Portfolio Config Customizer Modal */}
+      <ConfigCustomizerModal
+        isOpen={configModalOpen}
+        onClose={() => setConfigModalOpen(false)}
+        config={portfolioConfig}
+        onSaveConfig={handleSaveConfig}
+        onResetConfig={handleResetConfig}
       />
 
       {/* CRT Scanline & Screen Vignette Overlay */}
@@ -565,6 +668,7 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
                   key={item.id}
                   item={item}
                   theme={currentTheme}
+                  config={portfolioConfig}
                   onExecuteCommand={executeCommand}
                   onOpenResumeModal={() => setResumeOpen(true)}
                 />
@@ -615,7 +719,7 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="hidden sm:inline">ssfu.dev</span>
+            <span className="hidden sm:inline">{portfolioConfig.profile.name.toLowerCase().replace(/\s+/g, '')}.dev</span>
             <span>Theme: <strong style={{ color: currentTheme.accent }}>{currentTheme.name}</strong></span>
             <span className="hidden md:inline">Commands: {commandHistoryLog.length}</span>
           </div>

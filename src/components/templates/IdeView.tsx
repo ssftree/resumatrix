@@ -27,13 +27,15 @@ import {
   ABOUT_DATA,
   NEOFETCH_DATA
 } from '../../data/portfolioData';
-import { AppTemplate } from '../../types';
+import { AppTemplate, PortfolioConfig } from '../../types';
+import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
 
 interface IdeViewProps {
   onSwitchTemplate: (template: AppTemplate) => void;
+  config?: PortfolioConfig;
 }
 
-type FileId = 'readme' | 'profile' | 'experience' | 'skills' | 'projects' | 'contact';
+type FileId = 'readme' | 'profile' | 'experience' | 'skills' | 'projects' | 'contact' | 'config';
 
 interface IdeFile {
   id: FileId;
@@ -45,9 +47,15 @@ interface IdeFile {
   language: string;
 }
 
-export const IdeView: React.FC<IdeViewProps> = ({ onSwitchTemplate }) => {
+export const IdeView: React.FC<IdeViewProps> = ({ onSwitchTemplate, config = DEFAULT_PORTFOLIO_CONFIG }) => {
+  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
+  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
+  const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
+  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
+  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+
   const [activeFileId, setActiveFileId] = useState<FileId>('profile');
-  const [openFiles, setOpenFiles] = useState<FileId[]>(['profile', 'experience', 'projects']);
+  const [openFiles, setOpenFiles] = useState<FileId[]>(['profile', 'experience', 'projects', 'config']);
   const [srcFolderOpen, setSrcFolderOpen] = useState(true);
   const [copied, setCopied] = useState(false);
   const [bottomTerminalOpen, setBottomTerminalOpen] = useState(false);
@@ -69,30 +77,25 @@ export interface DeveloperProfile {
   location: string;
   status: string;
   philosophy: string;
-  interests: string[];
+  yearsOfExperience: string;
 }
 
-export const ssfuProfile: DeveloperProfile = {
-  name: "${ABOUT_DATA.name}",
-  title: "${ABOUT_DATA.title}",
-  location: "${ABOUT_DATA.location}",
-  status: "${ABOUT_DATA.status}",
-  philosophy: "${ABOUT_DATA.bio.split('\n')[0].replace(/"/g, '\\"')}",
-  interests: [
-    "High-Concurrency Distributed Systems",
-    "Large Language Model (LLM) Agent Architecture",
-    "Linux Kernel & eBPF Telemetry",
-    "Open Source Tooling & CLI Utilities"
-  ]
+export const devProfile: DeveloperProfile = {
+  name: "${profile.name}",
+  title: "${profile.title}",
+  location: "${profile.location}",
+  status: "${profile.status}",
+  philosophy: "${profile.bio.split('\n')[0].replace(/"/g, '\\"')}",
+  yearsOfExperience: "${profile.yearsOfExperience || '10+ Years'}"
 };
 
 export default function ProfileView() {
   return (
     <div className="profile-container">
-      <h1>{ssfuProfile.name}</h1>
-      <h2>{ssfuProfile.title}</h2>
-      <p className="status-badge">🟢 {ssfuProfile.status}</p>
-      <blockquote>{ssfuProfile.philosophy}</blockquote>
+      <h1>{devProfile.name}</h1>
+      <h2>{devProfile.title}</h2>
+      <p className="status-badge">🟢 {devProfile.status}</p>
+      <blockquote>{devProfile.philosophy}</blockquote>
     </div>
   );
 }`,
@@ -113,7 +116,7 @@ export default function ProfileView() {
 }
 
 export const CAREER_HISTORY: WorkExperience[] = ${JSON.stringify(
-        EXPERIENCE_DATA.map((exp) => ({
+        experience.map((exp) => ({
           role: exp.role,
           company: exp.company,
           period: exp.period,
@@ -133,9 +136,9 @@ export const CAREER_HISTORY: WorkExperience[] = ${JSON.stringify(
       language: 'json',
       content: JSON.stringify(
         {
-          version: '2.4.0',
-          developer: ABOUT_DATA.name,
-          competencies: SKILLS_DATA,
+          version: config.version || '2.5.0',
+          developer: profile.name,
+          competencies: skills,
         },
         null,
         2
@@ -160,7 +163,7 @@ export const CAREER_HISTORY: WorkExperience[] = ${JSON.stringify(
 }
 
 export const SHOWCASE_PROJECTS: ProjectItem[] = ${JSON.stringify(
-        PROJECTS_DATA.map((p) => ({
+        projects.map((p) => ({
           id: p.id,
           name: p.title,
           category: p.category,
@@ -174,6 +177,15 @@ export const SHOWCASE_PROJECTS: ProjectItem[] = ${JSON.stringify(
         2
       )};`,
     },
+    config: {
+      id: 'config',
+      name: 'portfolio.config.json',
+      extension: 'json',
+      path: 'portfolio.config.json',
+      icon: <Settings className="w-4 h-4 text-emerald-400" />,
+      language: 'json',
+      content: JSON.stringify(config, null, 2),
+    },
     readme: {
       id: 'readme',
       name: 'README.md',
@@ -181,26 +193,24 @@ export const SHOWCASE_PROJECTS: ProjectItem[] = ${JSON.stringify(
       path: 'README.md',
       icon: <FileText className="w-4 h-4 text-emerald-400" />,
       language: 'markdown',
-      content: `# ${ABOUT_DATA.name} - Engineering Portfolio & Resume
+      content: `# ${profile.name} - Engineering Portfolio & Resume
 
-> ${ABOUT_DATA.title} | ${ABOUT_DATA.location}
-> Status: ${ABOUT_DATA.status}
+> ${profile.title} | ${profile.location}
+> Status: ${profile.status}
 
 ## ⚡ Overview
-${ABOUT_DATA.bio}
+${profile.bio}
 
 ## 🛠️ Core Capabilities
-- **Backend Architecture**: Go, Rust, Node.js, Python, gRPC, Distributed Messaging
-- **AI & Agents**: Google Gemini API, Agentic Workflows, Function Calling, RAG Pipelines
-- **Cloud & DevOps**: Kubernetes, Docker, CI/CD, Terraform, Prometheus/Grafana
+${skills.map((s) => `- **${s.title}**: ${s.skills.map((k) => k.name).join(', ')}`).join('\n')}
 
 ## 🚀 Key Achievements
-- Scaled distributed services handling over 100M daily API calls.
-- Architected agentic developer tooling reducing pipeline delivery latency by 45%.
-- Active contributor to open-source systems software and developer toolkits.
+- Scaled distributed services handling mission-critical workloads.
+- Modularized architecture supporting Terminal, Bento, IDE, and LaTeX Academic modes.
+- Config-driven replicable portfolio system.
 
 ---
-*Built with React, TypeScript & Tailwind CSS. Switch to Terminal CLI or Bento Grid anytime!*`,
+*Built with React, TypeScript & Tailwind CSS. Switch to Terminal CLI, Bento Grid, or LaTeX Academic view anytime!*`,
     },
     contact: {
       id: 'contact',
@@ -210,13 +220,13 @@ ${ABOUT_DATA.bio}
       icon: <Settings className="w-4 h-4 text-yellow-400" />,
       language: 'bash',
       content: `# Contact Information & Social Graph
-DEV_EMAIL="${CONTACT_DATA.email}"
-DEV_GITHUB="${CONTACT_DATA.github}"
-DEV_LINKEDIN="${CONTACT_DATA.linkedin}"
-DEV_TWITTER="${CONTACT_DATA.twitter}"
-DEV_LOCATION="${CONTACT_DATA.location}"
-DEV_AVAILABILITY="Available for high-impact backend & AI engineering roles"
-GPG_KEY="4A9F 8B12 3C7D 90EE"`,
+DEV_EMAIL="${contact.email}"
+DEV_GITHUB="${contact.github}"
+DEV_LINKEDIN="${contact.linkedin}"
+DEV_TWITTER="${contact.twitter}"
+DEV_LOCATION="${contact.location}"
+DEV_WEBSITE="${contact.blog || 'https://ssfu.dev'}"
+DEV_AVAILABILITY="${profile.status}"`,
     },
   };
 

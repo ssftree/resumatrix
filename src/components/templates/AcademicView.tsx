@@ -7,13 +7,21 @@ import {
   SKILLS_DATA, 
   CONTACT_DATA 
 } from '../../data/portfolioData';
-import { AppTemplate } from '../../types';
+import { AppTemplate, PortfolioConfig } from '../../types';
+import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
 
 interface AcademicViewProps {
   onSwitchTemplate: (template: AppTemplate) => void;
+  config?: PortfolioConfig;
 }
 
-export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) => {
+export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate, config = DEFAULT_PORTFOLIO_CONFIG }) => {
+  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
+  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
+  const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
+  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
+  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+
   const handlePrint = () => {
     window.print();
   };
@@ -65,22 +73,22 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) 
         {/* Header */}
         <div className="text-center pb-4 border-b border-neutral-300">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-black font-sans uppercase">
-            {ABOUT_DATA.name}
+            {profile.name}
           </h1>
           <p className="text-sm font-sans text-neutral-700 mt-1 font-medium">
-            {ABOUT_DATA.title} • {ABOUT_DATA.location}
+            {profile.title} • {profile.location}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-neutral-600 mt-2 font-sans">
             <span className="flex items-center gap-1">
-              <Mail className="w-3 h-3 text-neutral-500" /> {CONTACT_DATA.email}
+              <Mail className="w-3 h-3 text-neutral-500" /> {contact.email}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <Globe className="w-3 h-3 text-neutral-500" /> ssfu.dev
+              <Globe className="w-3 h-3 text-neutral-500" /> {contact.blog || 'ssfu.dev'}
             </span>
             <span>•</span>
             <span className="flex items-center gap-1">
-              <Github className="w-3 h-3 text-neutral-500" /> {CONTACT_DATA.github}
+              <Github className="w-3 h-3 text-neutral-500" /> {contact.github}
             </span>
           </div>
         </div>
@@ -91,7 +99,7 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) 
             Executive Summary
           </h2>
           <p className="text-neutral-800 leading-normal text-justify">
-            {ABOUT_DATA.bio}
+            {profile.bio}
           </p>
         </div>
 
@@ -101,7 +109,7 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) 
             Technical Competencies
           </h2>
           <div className="space-y-1.5">
-            {SKILLS_DATA.map((group) => (
+            {skills.map((group) => (
               <div key={group.title} className="flex flex-col sm:flex-row text-xs">
                 <span className="font-bold sm:w-44 text-neutral-900 shrink-0 font-sans">
                   {group.title}:
@@ -120,7 +128,7 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) 
             Professional Experience
           </h2>
           <div className="space-y-4">
-            {EXPERIENCE_DATA.map((exp, idx) => (
+            {experience.map((exp, idx) => (
               <div key={idx} className="space-y-1">
                 <div className="flex flex-col sm:flex-row sm:items-baseline justify-between">
                   <span className="font-bold text-neutral-900 font-sans text-sm">
@@ -150,7 +158,7 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate }) 
             Key Systems & Architecture Projects
           </h2>
           <div className="space-y-3">
-            {PROJECTS_DATA.slice(0, 3).map((proj) => (
+            {projects.slice(0, 3).map((proj) => (
               <div key={proj.id} className="space-y-1">
                 <div className="flex items-baseline justify-between">
                   <span className="font-bold text-neutral-900 font-sans text-xs">

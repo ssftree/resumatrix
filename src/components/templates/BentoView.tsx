@@ -28,28 +28,40 @@ import {
   ABOUT_DATA,
   NEOFETCH_DATA
 } from '../../data/portfolioData';
-import { AppTemplate } from '../../types';
+import { AppTemplate, PortfolioConfig } from '../../types';
+import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
 
 interface BentoViewProps {
   onSwitchTemplate: (template: AppTemplate) => void;
   onOpenResumeModal: () => void;
+  config?: PortfolioConfig;
 }
 
 export const BentoView: React.FC<BentoViewProps> = ({ 
   onSwitchTemplate, 
-  onOpenResumeModal 
+  onOpenResumeModal,
+  config = DEFAULT_PORTFOLIO_CONFIG 
 }) => {
+  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
+  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
+  const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
+  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
+  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+  const system = config.system || DEFAULT_PORTFOLIO_CONFIG.system;
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copiedEmail, setCopiedEmail] = useState(false);
 
-  const categories = ['all', 'AI & Agents', 'Distributed Systems', 'Developer Tools'];
+  // Dynamic category tags from projects
+  const uniqueCategories = Array.from(new Set(projects.map((p) => p.category)));
+  const categories = ['all', ...uniqueCategories];
 
   const filteredProjects = selectedCategory === 'all'
-    ? PROJECTS_DATA
-    : PROJECTS_DATA.filter((p) => p.category.toLowerCase().includes(selectedCategory.toLowerCase()));
+    ? projects
+    : projects.filter((p) => p.category.toLowerCase().includes(selectedCategory.toLowerCase()));
 
   const handleCopyEmail = () => {
-    navigator.clipboard.writeText(CONTACT_DATA.email);
+    navigator.clipboard.writeText(contact.email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
   };
@@ -70,20 +82,20 @@ export const BentoView: React.FC<BentoViewProps> = ({
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-6 rounded-2xl bg-neutral-900/80 border border-neutral-800 backdrop-blur-xl shadow-xl">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/20 via-blue-500/20 to-purple-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl font-mono font-bold text-emerald-400 shadow-inner">
-              SF
+              {profile.avatarInitials || profile.name.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-white">{ABOUT_DATA.name}</h1>
+                <h1 className="text-2xl font-bold tracking-tight text-white">{profile.name}</h1>
                 <span className="inline-flex items-center gap-1 text-[11px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Available for Hire
+                  {profile.status}
                 </span>
               </div>
-              <p className="text-sm text-neutral-400 mt-0.5">{ABOUT_DATA.title}</p>
+              <p className="text-sm text-neutral-400 mt-0.5">{profile.title}</p>
               <p className="text-xs text-neutral-500 flex items-center gap-1 mt-1">
                 <MapPin className="w-3 h-3" />
-                {ABOUT_DATA.location} • ssfu.dev
+                {profile.location} • {contact.blog || 'ssfu.dev'}
               </p>
             </div>
           </div>
@@ -124,24 +136,22 @@ export const BentoView: React.FC<BentoViewProps> = ({
                   <Sparkles className="w-4 h-4" />
                   Engineering Philosophy
                 </div>
-                <span className="text-xs font-mono text-neutral-500">10+ Years Experience</span>
+                <span className="text-xs font-mono text-neutral-500">{profile.yearsOfExperience || '10+ Years Experience'}</span>
               </div>
               <p className="text-neutral-300 text-sm leading-relaxed mb-4">
-                {ABOUT_DATA.bio}
+                {profile.bio}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                <div className="p-3 rounded-xl bg-black/40 border border-neutral-800">
-                  <div className="text-lg font-bold text-white font-mono">100M+</div>
-                  <div className="text-xs text-neutral-400">Daily API Events Scaled</div>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-neutral-800">
-                  <div className="text-lg font-bold text-white font-mono">99.99%</div>
-                  <div className="text-xs text-neutral-400">SLA Architecture Uptime</div>
-                </div>
-                <div className="p-3 rounded-xl bg-black/40 border border-neutral-800">
-                  <div className="text-lg font-bold text-white font-mono">45%</div>
-                  <div className="text-xs text-neutral-400">CI/CD Latency Reduction</div>
-                </div>
+                {(profile.stats || [
+                  { metric: '100M+', label: 'Daily API Events Scaled' },
+                  { metric: '99.99%', label: 'SLA Architecture Uptime' },
+                  { metric: '45%', label: 'CI/CD Latency Reduction' },
+                ]).map((st, sIdx) => (
+                  <div key={sIdx} className="p-3 rounded-xl bg-black/40 border border-neutral-800">
+                    <div className="text-lg font-bold text-white font-mono">{st.metric}</div>
+                    <div className="text-xs text-neutral-400">{st.label}</div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -230,7 +240,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
             </div>
 
             <div className="space-y-3">
-              {SKILLS_DATA.map((group) => (
+              {skills.map((group) => (
                 <div key={group.title} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-medium text-neutral-300">
                     <span>{group.title}</span>
@@ -267,7 +277,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
             </div>
 
             <div className="space-y-4">
-              {EXPERIENCE_DATA.slice(0, 3).map((exp, idx) => (
+              {experience.slice(0, 3).map((exp, idx) => (
                 <div key={idx} className="relative pl-4 border-l-2 border-neutral-800 space-y-1">
                   <div className="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-emerald-400" />
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5">
@@ -376,7 +386,7 @@ export const BentoView: React.FC<BentoViewProps> = ({
         {/* Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-neutral-500 py-6 border-t border-neutral-800/80 font-mono gap-3">
           <div>
-            © {new Date().getFullYear()} {ABOUT_DATA.name} • ssfu.dev
+            © {new Date().getFullYear()} {profile.name} • {contact.blog || 'ssfu.dev'}
           </div>
           <div className="flex items-center gap-4">
             <button
