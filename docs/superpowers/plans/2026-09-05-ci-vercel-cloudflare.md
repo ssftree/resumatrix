@@ -107,7 +107,8 @@ git commit -m "ci: verify lint tests and build"
 
 ```jsonc
 {
-  "name": "terminal-website",
+  "name": "resumatrix",
+  "compatibility_date": "2026-09-03",
   "pages_build_output_dir": "./dist"
 }
 ```
