@@ -2,6 +2,12 @@
 
 一个由 React + Vite 构建的交互式开发者作品集。同一份履历数据可以切换为 Terminal、Cloud IDE、Bento Grid、Retro OS、Telemetry、Swiss Brutalism 和 Academic CV 七种展示形式。
 
+## 预览
+
+| Terminal | Bento Grid | Telemetry |
+| --- | --- | --- |
+| ![Terminal 模板截图](./public/assets/screenshots/terminal.png) | ![Bento Grid 模板截图](./public/assets/screenshots/bento.png) | ![Telemetry 模板截图](./public/assets/screenshots/telemetry.png) |
+
 ## 功能概览
 
 - 可交互终端：命令历史、补全、虚拟文件系统、项目详情和多套主题
