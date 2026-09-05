@@ -1,0 +1,158 @@
+- generic [ref=e3]:
+  - navigation "Portfolio layouts" [ref=e5]:
+    - generic [ref=e7]:
+      - button "Terminal CLI" [ref=e8]:
+        - generic [ref=e11]: Terminal
+        - generic [ref=e12]: CLI
+      - button "Cloud IDE VS Code" [ref=e13]:
+        - generic [ref=e18]: Cloud IDE
+        - generic [ref=e19]: VS Code
+      - button "Bento Grid Modern" [ref=e20]:
+        - generic [ref=e26]: Bento Grid
+        - generic [ref=e27]: Modern
+      - button "Retro OS Win95" [ref=e28]:
+        - generic [ref=e31]: Retro OS
+        - generic [ref=e32]: Win95
+      - button "Telemetry Grafana" [ref=e33]:
+        - generic [ref=e36]: Telemetry
+        - generic [ref=e37]: Grafana
+      - button "Brutalism Swiss" [ref=e38]:
+        - generic [ref=e41]: Brutalism
+        - generic [ref=e42]: Swiss
+      - button "LaTeX CV Print" [ref=e43]:
+        - generic [ref=e47]: LaTeX CV
+        - generic [ref=e48]: Print
+    - button "Customize" [ref=e50]
+  - main [ref=e53]:
+    - generic [ref=e54]:
+      - generic "Window Controls" [ref=e56]:
+        - button "×" [ref=e57] [cursor=pointer]
+        - button "-" [ref=e59] [cursor=pointer]
+        - button "+" [ref=e61] [cursor=pointer]
+      - generic [ref=e164]: ssfu.dev
+      - generic [ref=e69]:
+        - button "Show Side-by-Side Visual Preview" [ref=e168] [cursor=pointer]
+        - button "Enable Mechanical Audio FX" [ref=e74] [cursor=pointer]
+        - button "Disable Retro CRT Scanlines" [ref=e79] [cursor=pointer]
+        - button "Select Color Palette" [ref=e169] [cursor=pointer]
+        - button "Clear Screen (Ctrl+L)" [ref=e91] [cursor=pointer]
+        - button "Show Command Help" [ref=e95] [cursor=pointer]
+    - generic [ref=e107]:
+      - generic [ref=e108]: "███████╗███████╗███████╗██╗ ██╗ ██████╗ ███████╗██╗ ██╗ ██╔════╝██╔════╝██╔════╝██║ ██║ ██╔══██╗██╔════╝██║ ██║ ███████╗███████╗█████╗ ██║ ██║ ██║ ██║█████╗ ██║ ██║ ╚════██║╚════██║██╔══╝ ██║ ██║ ██║ ██║██╔══╝ ╚██╗ ██╔╝ ███████║███████║██║ ╚██████╔╝██╗██████╔╝███████╗ ╚████╔╝ ╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝╚═════╝ ╚══════╝ ╚═══╝ ╭──────────────────────────────────────────────────────────────╮ │ Welcome to ssfu's Engineering Workspace (v2.5.0) │ │ Interactive Portfolio & Multi-Style Digital CV • ssfu.dev │ ╰──────────────────────────────────────────────────────────────╯ Styles: [terminal] [ide] [bento] [academic] (Use top switcher or type 'template <name>') Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [template]"
+      - generic [ref=e144]:
+        - generic [ref=e145]:
+          - generic [ref=e146]: guest@ssfu.dev
+          - generic [ref=e147]: ":"
+          - generic [ref=e148]: ~
+          - generic [ref=e149]: $
+          - generic [ref=e150]: sudo hire me
+        - generic [ref=e152]: "╭─ PRIVILEGE ESCALATION GRANTED ─────────────────────╮ │ Candidate : ssfu │ Role : Senior Full-Stack & Systems Engineer │ Status : Open to High-Impact Roles & Remote Engineering │ Next step : mailto:ssfu.dev@gmail.com ╰─ Ready to ship. No root access required. ──────────╯"
+      - generic [ref=e154]:
+        - generic [ref=e155]:
+          - generic [ref=e156]: guest@ssfu.dev
+          - generic [ref=e157]: ":"
+          - generic [ref=e158]: ~
+          - generic [ref=e159]: $
+          - generic [ref=e160]: rps paper
+        - generic [ref=e162]: "You: paper | Terminal: paper Result: Draw"
+      - generic [ref=e170]:
+        - generic [ref=e171]:
+          - generic [ref=e172]: guest@ssfu.dev
+          - generic [ref=e173]: ":"
+          - generic [ref=e174]: ~
+          - generic [ref=e175]: $
+          - generic [ref=e176]: help
+        - generic [ref=e178]:
+          - paragraph [ref=e179]: Available Terminal Commands
+          - generic [ref=e180]:
+            - generic [ref=e181]:
+              - text: Portfolio & Profile
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - button "about / whoami" [ref=e184] [cursor=pointer]
+                  - generic [ref=e185]: Personal bio, mission & info
+                - generic [ref=e186]:
+                  - button "skills" [ref=e187] [cursor=pointer]
+                  - generic [ref=e188]: Technical stack & proficiency
+                - generic [ref=e189]:
+                  - button "projects" [ref=e190] [cursor=pointer]
+                  - generic [ref=e191]: Interactive project portfolio
+                - generic [ref=e192]:
+                  - button "exp / career" [ref=e193] [cursor=pointer]
+                  - generic [ref=e194]: Work history & milestones
+                - generic [ref=e195]:
+                  - button "contact" [ref=e196] [cursor=pointer]
+                  - generic [ref=e197]: Social channels & email
+                - generic [ref=e198]:
+                  - button "resume" [ref=e199] [cursor=pointer]
+                  - generic [ref=e200]: Curriculum Vitae viewer
+            - generic [ref=e201]:
+              - text: System & Exploration
+              - generic [ref=e202]:
+                - generic [ref=e203]:
+                  - button "neofetch" [ref=e204] [cursor=pointer]
+                  - generic [ref=e205]: System specs & ASCII banner
+                - generic [ref=e206]:
+                  - button "ls" [ref=e207] [cursor=pointer]
+                  - generic [ref=e208]: List files in directory
+                - generic [ref=e209]:
+                  - generic [ref=e210]: cat [file]
+                  - generic [ref=e211]: View file contents (e.g. cat about.txt)
+                - generic [ref=e212]:
+                  - button "theme [name]" [ref=e213] [cursor=pointer]
+                  - generic [ref=e214]: Change palette (matrix, dracula...)
+                - generic [ref=e215]:
+                  - button "template" [ref=e216] [cursor=pointer]
+                  - generic [ref=e217]: Switch template (ide, bento, academic, terminal)
+                - generic [ref=e218]:
+                  - button "matrix" [ref=e219] [cursor=pointer]
+                  - generic [ref=e220]: Toggle green digital rain screen
+                - generic [ref=e221]:
+                  - button "clear (Ctrl+L)" [ref=e222] [cursor=pointer]
+                  - generic [ref=e223]: Clear terminal screen
+            - generic [ref=e224]:
+              - text: Easter Eggs
+              - generic [ref=e225]:
+                - generic [ref=e226]:
+                  - button "sudo hire me" [ref=e227] [cursor=pointer]
+                  - generic [ref=e228]: Run the recruiter privilege check
+                - generic [ref=e229]:
+                  - button "rps [move]" [ref=e230] [cursor=pointer]
+                  - generic [ref=e231]: Play rock, paper, scissors
+          - generic [ref=e232]:
+            - generic [ref=e233]: "Shortcuts:"
+            - generic [ref=e234]: Tab
+            - text: Autocomplete
+            - generic [ref=e235]: •
+            - generic [ref=e236]: ↑ / ↓
+            - text: History
+            - generic [ref=e237]: •
+            - generic [ref=e238]: Ctrl+L
+            - text: Clear
+            - generic [ref=e239]: •
+            - generic [ref=e240]: Click any command chip below for instant execution!
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]: guest@ssfu.dev
+          - generic [ref=e114]: ":"
+          - generic [ref=e115]: ~
+          - generic [ref=e116]: $
+          - textbox [active] [ref=e118]
+        - generic [ref=e120]:
+          - generic [ref=e121]: "Quick:"
+          - button "help" [ref=e122] [cursor=pointer]
+          - button "about" [ref=e123] [cursor=pointer]
+          - button "skills" [ref=e124] [cursor=pointer]
+          - button "projects" [ref=e125] [cursor=pointer]
+          - button "exp" [ref=e126] [cursor=pointer]
+          - button "contact" [ref=e127] [cursor=pointer]
+          - button "resume" [ref=e128] [cursor=pointer]
+          - button "neofetch" [ref=e129] [cursor=pointer]
+          - button "theme" [ref=e130] [cursor=pointer]
+          - button "matrix" [ref=e131] [cursor=pointer]
+          - button "clear" [ref=e132] [cursor=pointer]
+    - generic [ref=e133]:
+      - generic [ref=e134]: zsh 5.9
+      - generic [ref=e141]:
+        - text: "Theme:"
+        - strong [ref=e142]: Matrix CRT

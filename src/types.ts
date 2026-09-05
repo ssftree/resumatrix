@@ -74,6 +74,9 @@ export interface PortfolioConfig {
   experience: Experience[];
   projects: Project[];
   education?: EducationItem[];
+  terminal?: {
+    easterEggsEnabled?: boolean;
+  };
   system?: {
     os?: string;
     host?: string;

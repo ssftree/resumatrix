@@ -71,4 +71,36 @@ describe('validatePortfolioConfig', () => {
     expect(result.data.contact.github).toBe('https://github.com/example');
     expect(result.data.projects[0].demoUrl).toBe('https://demo.example.test/app');
   });
+
+  it('keeps older configurations without terminal preferences compatible', () => {
+    const legacyConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    delete legacyConfig.terminal;
+
+    const result = validatePortfolioConfig(legacyConfig);
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.terminal).toBeUndefined();
+  });
+
+  it('preserves a valid setting that disables terminal easter eggs', () => {
+    const config = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    config.terminal = { easterEggsEnabled: false };
+
+    const result = validatePortfolioConfig(config);
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.terminal).toEqual({ easterEggsEnabled: false });
+  });
+
+  it('rejects a non-boolean terminal easter egg setting', () => {
+    const config = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    config.terminal = { easterEggsEnabled: 'yes' };
+
+    expect(validatePortfolioConfig(config)).toEqual({
+      success: false,
+      error: 'Invalid portfolio configuration: terminal.easterEggsEnabled must be a boolean.',
+    });
+  });
 });

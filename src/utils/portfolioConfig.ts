@@ -274,6 +274,18 @@ const readSystem = (value: unknown): PortfolioConfig['system'] | ValidationError
   return system;
 };
 
+const readTerminal = (value: unknown): PortfolioConfig['terminal'] | ValidationError => {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return invalid('terminal must be an object.');
+  const easterEggsEnabled = value.easterEggsEnabled;
+  if (easterEggsEnabled === undefined) return {};
+  if (typeof easterEggsEnabled !== 'boolean') {
+    return invalid('terminal.easterEggsEnabled must be a boolean.');
+  }
+
+  return { easterEggsEnabled };
+};
+
 /**
  * Validates untrusted persisted/imported data and returns a fresh, typed copy.
  * The copy also discards unknown fields so all consumers receive one predictable shape.
@@ -288,9 +300,10 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
   const experience = readExperience(value.experience);
   const projects = readProjects(value.projects);
   const education = readEducation(value.education);
+  const terminal = readTerminal(value.terminal);
   const system = readSystem(value.system);
 
-  for (const result of [version, profile, contact, skills, experience, projects, education, system]) {
+  for (const result of [version, profile, contact, skills, experience, projects, education, terminal, system]) {
     if (isFailure(result)) return result;
   }
 
@@ -304,6 +317,7 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
       experience: experience as Experience[],
       projects: projects as Project[],
       education: education as EducationItem[] | undefined,
+      terminal: terminal as PortfolioConfig['terminal'],
       system: system as PortfolioConfig['system'],
     },
   };
