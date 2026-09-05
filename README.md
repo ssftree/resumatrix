@@ -129,7 +129,7 @@ npm run build
 - **Vercel:** open **New Project → Import Git Repository**, select the existing `ssftree/resumatrix` repository, keep the Vite preset, and use `main` as the production branch. The old `ssftree/terminal-website` URL currently redirects to this repository.
 - **Cloudflare Pages:** open **Workers & Pages → Create → Continue to Pages → Import an existing Git repository**, select the same existing repository, and configure `main`, `npm run build`, and `dist`.
 
-Both providers build from the same repository. Pushes to `main` publish production deployments, while other branches and pull requests produce previews. The site has no client-side router, so no extra SPA rewrite rule is needed.
+Both providers build from the same repository. Pushes to `main` publish production deployments, while other branches and eligible pull requests produce previews. The site has no client-side router, so no extra SPA rewrite rule is needed.
 
 Before going live, consider adding:
 

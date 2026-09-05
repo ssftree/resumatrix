@@ -156,7 +156,7 @@ Expected: Vercel returns a production deployment URL.
 
 Import the existing canonical repository `ssftree/resumatrix` through **Workers & Pages → Create → Import an existing Git repository**, set `main`, `npm run build`, and `dist`, then deploy.
 
-Expected: Wrangler returns a successful deployment and a `pages.dev` URL.
+Expected: Cloudflare reports a successful deployment and a `pages.dev` URL.
 
 - [ ] **Step 4: Verify both production endpoints**
 

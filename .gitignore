@@ -9,4 +9,3 @@ coverage/
 *.log
 .env*
 !.env.example
-.wrangler/
