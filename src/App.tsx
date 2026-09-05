@@ -16,11 +16,16 @@ import {
   PROJECTS_DATA, 
   VIRTUAL_FILESYSTEM 
 } from './data/portfolioData';
-import { TerminalHistoryItem, ThemeConfig, ThemeKey } from './types';
+import { TerminalHistoryItem, ThemeConfig, ThemeKey, AppTemplate } from './types';
 import { THEMES } from './utils/themes';
 import { soundEngine } from './utils/sound';
+import { TemplateSwitcher } from './components/TemplateSwitcher';
+import { IdeView } from './components/templates/IdeView';
+import { BentoView } from './components/templates/BentoView';
+import { AcademicView } from './components/templates/AcademicView';
 
 export default function App() {
+  const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>('terminal');
   const [themeKey, setThemeKey] = useState<ThemeKey>('matrix');
   const currentTheme: ThemeConfig = THEMES[themeKey];
 
@@ -48,14 +53,12 @@ export default function App() {
         type: 'text',
         content: `${ASCII_BANNER}
   ╭──────────────────────────────────────────────────────────────╮
-  │  Welcome to ssfu's Terminal Portfolio (v2.4.0)               │
-  │  Interactive CLI portfolio & digital workspace for ssfu.dev │
+  │  Welcome to ssfu's Engineering Workspace (v2.5.0)            │
+  │  Interactive Portfolio & Multi-Style Digital CV • ssfu.dev   │
   ╰──────────────────────────────────────────────────────────────╯
 
-Type 'help' for commands, 'about' for bio, 'projects' to view work,
-or 'neofetch' to view system specs.
-
-Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme]`,
+Styles: [terminal] [ide] [bento] [academic] (Use top switcher or type 'template <name>')
+Quick commands: [help] [about] [skills] [projects] [exp] [contact] [theme] [template]`,
       },
     };
 
@@ -280,6 +283,46 @@ Usage: theme <name> (e.g. theme dracula, theme cyberpunk, theme amber, theme nor
         break;
       }
 
+      case 'template':
+      case 'view':
+      case 'layout': {
+        if (!arg) {
+          outputType = 'text';
+          outputContent = `Active Resume/Portfolio Template: ${currentTemplate}
+
+Available Templates:
+  • terminal  - Interactive Retro CLI Terminal (current)
+  • ide       - Visual Studio Code / Cloud IDE Code Layout
+  • bento     - Modern Raycast / Linear Obsidian Bento Grid
+  • academic  - LaTeX Paper / Print-ready Academic CV
+
+Usage: template <name> (e.g. template ide, template bento, template academic, template terminal)`;
+        } else {
+          const chosen = arg.toLowerCase();
+          if (chosen === 'ide' || chosen === 'vscode') {
+            setCurrentTemplate('ide');
+            outputType = 'success';
+            outputContent = `Switching view to Cloud IDE (VS Code)...`;
+          } else if (chosen === 'bento' || chosen === 'modern' || chosen === 'grid') {
+            setCurrentTemplate('bento');
+            outputType = 'success';
+            outputContent = `Switching view to Modern Bento Grid...`;
+          } else if (chosen === 'academic' || chosen === 'latex' || chosen === 'cv' || chosen === 'paper') {
+            setCurrentTemplate('academic');
+            outputType = 'success';
+            outputContent = `Switching view to LaTeX Academic CV...`;
+          } else if (chosen === 'terminal' || chosen === 'cli') {
+            setCurrentTemplate('terminal');
+            outputType = 'success';
+            outputContent = `Staying in Terminal CLI mode.`;
+          } else {
+            outputType = 'error';
+            outputContent = `Unknown template '${arg}'. Valid options: terminal, ide, bento, academic`;
+          }
+        }
+        break;
+      }
+
       case 'matrix':
         setMatrixActive((prev) => !prev);
         outputType = 'success';
@@ -379,6 +422,65 @@ Usage: theme <name> (e.g. theme dracula, theme cyberpunk, theme amber, theme nor
     executeCommand('help');
   };
 
+  // Render IDE View
+  if (currentTemplate === 'ide') {
+    return (
+      <div className="min-h-screen bg-[#181818] p-2 sm:p-6 flex flex-col justify-center relative">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+          />
+        </div>
+        <div className="max-w-7xl mx-auto w-full pt-10 sm:pt-2">
+          <IdeView onSwitchTemplate={setCurrentTemplate} />
+        </div>
+      </div>
+    );
+  }
+
+  // Render Bento Grid View
+  if (currentTemplate === 'bento') {
+    return (
+      <div className="min-h-screen bg-[#0d1117] relative">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+          />
+        </div>
+        <div className="pt-10 sm:pt-4">
+          <BentoView 
+            onSwitchTemplate={setCurrentTemplate} 
+            onOpenResumeModal={() => setResumeOpen(true)} 
+          />
+        </div>
+        <ResumeModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+          theme={currentTheme}
+        />
+      </div>
+    );
+  }
+
+  // Render Academic LaTeX View
+  if (currentTemplate === 'academic') {
+    return (
+      <div className="min-h-screen bg-neutral-900 relative">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+          />
+        </div>
+        <div className="pt-10 sm:pt-4">
+          <AcademicView onSwitchTemplate={setCurrentTemplate} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="min-h-screen w-full flex flex-col items-center justify-center p-0 sm:p-4 md:p-6 transition-colors duration-300 relative overflow-hidden"
@@ -387,6 +489,14 @@ Usage: theme <name> (e.g. theme dracula, theme cyberpunk, theme amber, theme nor
         color: currentTheme.text,
       }}
     >
+      {/* Floating Template Style Switcher */}
+      <div className="fixed top-3 right-4 z-40 print:hidden">
+        <TemplateSwitcher
+          currentTemplate={currentTemplate}
+          onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+        />
+      </div>
+
       {/* Optional Matrix Rain Screen */}
       <MatrixRain
         active={matrixActive}

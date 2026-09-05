@@ -64,6 +64,8 @@ export interface TerminalHistoryItem {
 
 export type ThemeKey = 'matrix' | 'dracula' | 'cyberpunk' | 'nord' | 'monokai' | 'amber' | 'light';
 
+export type AppTemplate = 'terminal' | 'ide' | 'bento' | 'academic';
+
 export interface ThemeConfig {
   id: ThemeKey;
   name: string;

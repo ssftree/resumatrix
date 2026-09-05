@@ -349,6 +349,14 @@ export const NEOFETCH_ART = [
   '       \\/',
 ];
 
+export const ABOUT_DATA = {
+  name: 'ssfu',
+  title: 'Senior Full-Stack & Systems Engineer',
+  location: 'Hangzhou / Remote',
+  status: 'Open to High-Impact Roles & Remote Engineering',
+  bio: 'Full-Stack Software Engineer & Systems Tinkerer with 6+ years of experience building resilient cloud applications, GPU-accelerated web runtimes, and developer tooling. Passionate about TypeScript, Rust, distributed architectures, and generative AI agent ecosystems.',
+};
+
 export const SYSTEM_INFO = {
   os: 'DevOS v2.4 (x86_64)',
   host: 'ThinkPad X1 Carbon Gen 11',
@@ -361,3 +369,6 @@ export const SYSTEM_INFO = {
   cpu: 'Intel Core i7-1365U (12) @ 5.2GHz',
   memory: '18420MiB / 32768MiB (56%)',
 };
+
+export const NEOFETCH_DATA = SYSTEM_INFO;
+

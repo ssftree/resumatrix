@@ -170,6 +170,16 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                   </div>
                   <div className="flex items-start">
                     <button 
+                      onClick={() => onExecuteCommand('template')} 
+                      className="hover:underline font-bold text-left cursor-pointer w-28" 
+                      style={{ color: theme.accent }}
+                    >
+                      template
+                    </button>
+                    <span className="opacity-80 text-neutral-300">Switch template (ide, bento, academic, terminal)</span>
+                  </div>
+                  <div className="flex items-start">
+                    <button 
                       onClick={() => onExecuteCommand('matrix')} 
                       className="hover:underline font-bold text-left cursor-pointer w-28" 
                       style={{ color: theme.accent }}
