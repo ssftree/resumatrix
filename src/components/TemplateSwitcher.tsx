@@ -7,6 +7,7 @@ import {
   SlidersHorizontal,
   Monitor,
   Activity,
+  GitBranch,
   Square
 } from 'lucide-react';
 import { AppTemplate } from '../types';
@@ -30,18 +31,6 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
       badge: 'CLI',
     },
     {
-      id: 'ide',
-      label: 'Cloud IDE',
-      icon: <Code2 className="w-3.5 h-3.5" />,
-      badge: 'VS Code',
-    },
-    {
-      id: 'bento',
-      label: 'Bento Grid',
-      icon: <LayoutGrid className="w-3.5 h-3.5" />,
-      badge: 'Modern',
-    },
-    {
       id: 'retro',
       label: 'Retro OS',
       icon: <Monitor className="w-3.5 h-3.5" />,
@@ -54,6 +43,12 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
       badge: 'Grafana',
     },
     {
+      id: 'devops',
+      label: 'DevOps Control',
+      icon: <GitBranch className="w-3.5 h-3.5" />,
+      badge: 'CI/CD',
+    },
+    {
       id: 'brutalism',
       label: 'Brutalism',
       icon: <Square className="w-3.5 h-3.5" />,
@@ -64,6 +59,18 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
       label: 'LaTeX CV',
       icon: <FileText className="w-3.5 h-3.5" />,
       badge: 'Print',
+    },
+    {
+      id: 'bento',
+      label: 'Bento Grid',
+      icon: <LayoutGrid className="w-3.5 h-3.5" />,
+      badge: 'Modern',
+    },
+    {
+      id: 'ide',
+      label: 'Cloud IDE',
+      icon: <Code2 className="w-3.5 h-3.5" />,
+      badge: 'VS Code',
     },
   ];
 

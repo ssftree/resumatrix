@@ -1,8 +1,8 @@
-# Terminal Portfolio — Design and Architecture
+# Resumatrix — Design and Architecture
 
 ## Product intent
 
-Terminal Portfolio presents one developer profile through seven deliberately different interfaces. The content should remain consistent while each view demonstrates a different design vocabulary:
+Resumatrix presents one developer profile through eight deliberately different interfaces. The content should remain consistent while each view demonstrates a different design vocabulary:
 
 | Template | Purpose | Visual language |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ Terminal Portfolio presents one developer profile through seven deliberately dif
 | Bento | Fast visual scan | Dashboard cards, metrics and project filters |
 | Retro | Playful exploration | Desktop windows, taskbar and Minesweeper |
 | Telemetry | Operations narrative | SRE dashboards, traces and service metrics |
+| DevOps Control | Delivery narrative | CI/CD control plane, release stages and service inventory |
 | Brutalism | Editorial portfolio | Swiss grid, high contrast and strong typography |
 | Academic | Printable résumé | Paper layout optimized for print/PDF |
 
@@ -28,7 +29,7 @@ src/main.tsx
       ├─ GuiPreview                  terminal split preview
       ├─ ConfigCustomizerModal       live editing and JSON import/export
       ├─ ResumeModal                 printable résumé overlay
-      └─ templates/*                 seven independent presentations
+      └─ templates/*                 eight independent presentations
 
 portfolio.config.ts ──> PortfolioConfig ──> App state ──> active presentation
                                ▲

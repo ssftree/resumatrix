@@ -182,7 +182,7 @@ export const TerminalOutput: React.FC<TerminalOutputProps> = ({
                     >
                       template
                     </button>
-                    <span className="opacity-80 text-neutral-300">Switch template (ide, bento, academic, terminal)</span>
+                    <span className="opacity-80 text-neutral-300">Switch template (ide, bento, devops, academic, terminal)</span>
                   </div>
                   <div className="flex items-start">
                     <button 
