@@ -21,7 +21,7 @@ An interactive developer portfolio built with React + Vite. The same resume data
 
 ## Running Locally
 
-Requires Node.js 20 or later.
+Requires Node.js 24.15 or later. The checked-in `.node-version` is also used by CI and Cloudflare Pages.
 
 ```bash
 npm install

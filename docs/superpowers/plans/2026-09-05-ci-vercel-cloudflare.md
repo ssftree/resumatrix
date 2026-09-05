@@ -6,13 +6,14 @@
 
 **Architecture:** GitHub Actions will install the locked dependency graph and run the repository's lint, test, and production-build gates for pushes and pull requests. Provider-specific declarative files keep both static-host builds reproducible, while each provider imports the existing GitHub repository and continuously deploys `main` without cloning or creating another repository.
 
-**Tech Stack:** GitHub Actions, Node.js 20, npm, Vite 6, Vercel Git integration, Cloudflare Pages Git integration
+**Tech Stack:** GitHub Actions, Node.js 24.15, npm, Vite 6, Vercel Git integration, Cloudflare Pages Git integration
 
 **Spec:** `DESIGN.md`
 
 ## Global Constraints
 
 - Keep the application client-only and deploy the generated `dist/` directory.
+- Use Node.js 24.15.0 or later, pinned for CI and Cloudflare Pages through `.node-version`.
 - Do not modify generated `dist/` output directly.
 - Preserve existing portfolio data and visual behavior.
 - Before handoff run `npm run lint`, `npm test`, and `npm run build`.
@@ -55,7 +56,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .node-version
           cache: npm
       - name: Install dependencies
         run: npm ci
