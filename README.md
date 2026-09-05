@@ -21,7 +21,7 @@ An interactive developer portfolio built with React + Vite. The same resume data
 
 ## Running Locally
 
-Requires Node.js 20 or later.
+Requires Node.js 24.15 or later. The checked-in `.node-version` is also used by CI and Cloudflare Pages.
 
 ```bash
 npm install
@@ -113,25 +113,23 @@ Architecture, data flow, design constraints, and known gaps are detailed in [DES
 npm run build
 ```
 
-Deploy `dist/` to any static hosting service. The site has no client-side routing, so no extra SPA rewrite rules are needed.
+GitHub Actions runs `npm ci`, type-checking, regression tests, and a production build for pushes to `main` and all pull requests. The workflow lives at `.github/workflows/ci.yml`.
 
-### One-Click Deploy
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ssftree/terminal-website)
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/ssftree/terminal-website)
-
-- **Vercel**: clicking the button prompts you to sign in and import the repository into your own account. `vercel.json` already declares the `npm run build` command and `dist` output directory, and Vercel auto-detects the Vite framework.
-- **Cloudflare**: clicking the button prompts you to sign in to Cloudflare and authorize GitHub, then deploys `dist` as a static-assets Worker per the `assets` config in `wrangler.jsonc`; the `deploy` script in `package.json` (`vite build && wrangler deploy`) builds automatically before deploying.
-
-Both buttons require you to sign in and authorize with your own account in the browser, so the actual deployment is triggered by you. You can also sign in locally beforehand and run it manually:
+Before deploying, run the same checks locally:
 
 ```bash
-# Vercel (requires npm i -g vercel and vercel login first)
-vercel --prod
-
-# Cloudflare (requires npx wrangler login first)
-npm run deploy
+npm ci
+npm run lint
+npm test
+npm run build
 ```
+
+### Git-connected deployment
+
+- **Vercel:** open **New Project → Import Git Repository**, select the existing `ssftree/resumatrix` repository, keep the Vite preset, and use `main` as the production branch. The old `ssftree/terminal-website` URL currently redirects to this repository.
+- **Cloudflare Pages:** open **Workers & Pages → Create → Continue to Pages → Import an existing Git repository**, select the same existing repository, and configure `main`, `npm run build`, and `dist`.
+
+Both providers build from the same repository. Pushes to `main` publish production deployments, while other branches and eligible pull requests produce previews. The site has no client-side router, so no extra SPA rewrite rule is needed.
 
 Before going live, consider adding:
 

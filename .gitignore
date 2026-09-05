@@ -1,4 +1,7 @@
 node_modules/
+.worktrees/
+.vercel/
+.wrangler/
 build/
 dist/
 coverage/
@@ -6,4 +9,3 @@ coverage/
 *.log
 .env*
 !.env.example
-.wrangler/
