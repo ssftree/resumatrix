@@ -1,19 +1,24 @@
-import React from 'react';
-import { Printer, Download, ArrowLeft, Terminal, LayoutGrid, Code2, Mail, Github, Globe } from 'lucide-react';
+import React, { useState } from 'react';
+import { Printer, Terminal, LayoutGrid, Code2 } from 'lucide-react';
 import { AppTemplate, PortfolioConfig } from '../../types';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../../portfolio.config';
+import { ResumeDocument } from '../ResumeDocument';
+import { listResumeLocales, resolveResumeLocale } from '../../utils/resumeLocale';
 
 interface AcademicViewProps {
   onSwitchTemplate: (template: AppTemplate) => void;
   config?: PortfolioConfig;
+  watermark?: 'brand' | 'none';
 }
 
-export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate, config = DEFAULT_PORTFOLIO_CONFIG }) => {
-  const profile = config.profile || DEFAULT_PORTFOLIO_CONFIG.profile;
-  const contact = config.contact || DEFAULT_PORTFOLIO_CONFIG.contact;
-  const skills = config.skills || DEFAULT_PORTFOLIO_CONFIG.skills;
-  const experience = config.experience || DEFAULT_PORTFOLIO_CONFIG.experience;
-  const projects = config.projects || DEFAULT_PORTFOLIO_CONFIG.projects;
+export const AcademicView: React.FC<AcademicViewProps> = ({
+  onSwitchTemplate,
+  config = DEFAULT_PORTFOLIO_CONFIG,
+  watermark = 'brand',
+}) => {
+  const [selectedLocale, setSelectedLocale] = useState<string | undefined>(undefined);
+  const localeOptions = listResumeLocales(config);
+  const { config: resolvedConfig, labels } = resolveResumeLocale(config, selectedLocale);
 
   const handlePrint = () => {
     window.print();
@@ -48,144 +53,44 @@ export const AcademicView: React.FC<AcademicViewProps> = ({ onSwitchTemplate, co
         </div>
 
         <div className="flex items-center gap-2">
+          {localeOptions.length > 0 && (
+            <label className="flex items-center gap-1.5">
+              <span className="sr-only">Resume language</span>
+              <select
+                aria-label="Resume language"
+                value={selectedLocale ?? localeOptions[0].value}
+                onChange={(event) => setSelectedLocale(event.target.value)}
+                className="bg-neutral-800 border border-neutral-700 rounded px-1.5 py-1.5 text-xs cursor-pointer"
+              >
+                {localeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <button
             onClick={handlePrint}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-sans font-medium shadow-md transition-colors"
           >
             <Printer className="w-3.5 h-3.5" />
-            <span>Print / Save PDF</span>
+            <span>{labels.print}</span>
           </button>
         </div>
       </div>
 
       {/* Paper Sheet (Academic LaTeX Style) */}
-      <div 
+      <div
         id="academic-resume-sheet"
-        className="w-full max-w-4xl bg-white text-neutral-900 p-8 sm:p-12 rounded-lg shadow-2xl font-serif text-[13px] leading-relaxed print:p-0 print:shadow-none print:rounded-none"
+        className="w-full max-w-4xl bg-white text-neutral-900 p-8 sm:p-12 rounded-lg shadow-2xl print:p-0 print:shadow-none print:rounded-none"
       >
-        {/* Header */}
-        <div className="text-center pb-4 border-b border-neutral-300">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-black font-sans uppercase">
-            {profile.name}
-          </h1>
-          <p className="text-sm font-sans text-neutral-700 mt-1 font-medium">
-            {profile.title} • {profile.location}
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-neutral-600 mt-2 font-sans">
-            <span className="flex items-center gap-1">
-              <Mail className="w-3 h-3 text-neutral-500" /> {contact.email}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Globe className="w-3 h-3 text-neutral-500" /> {contact.blog || 'ssfu.dev'}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1">
-              <Github className="w-3 h-3 text-neutral-500" /> {contact.github}
-            </span>
-          </div>
-        </div>
-
-        {/* Executive Summary */}
-        <div className="mt-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-black border-b-2 border-neutral-900 pb-0.5 mb-2 font-sans">
-            Executive Summary
-          </h2>
-          <p className="text-neutral-800 leading-normal text-justify">
-            {profile.bio}
-          </p>
-        </div>
-
-        {/* Technical Competencies */}
-        <div className="mt-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-black border-b-2 border-neutral-900 pb-0.5 mb-2 font-sans">
-            Technical Competencies
-          </h2>
-          <div className="space-y-1.5">
-            {skills.map((group) => (
-              <div key={group.title} className="flex flex-col sm:flex-row text-xs">
-                <span className="font-bold sm:w-44 text-neutral-900 shrink-0 font-sans">
-                  {group.title}:
-                </span>
-                <span className="text-neutral-800">
-                  {group.skills.map((i) => i.name).join(', ')}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Professional Experience */}
-        <div className="mt-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-black border-b-2 border-neutral-900 pb-0.5 mb-3 font-sans">
-            Professional Experience
-          </h2>
-          <div className="space-y-4">
-            {experience.map((exp, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between">
-                  <span className="font-bold text-neutral-900 font-sans text-sm">
-                    {exp.role} — <span className="italic font-normal">{exp.company}</span>
-                  </span>
-                  <span className="text-xs text-neutral-600 font-sans italic">
-                    {exp.period}
-                  </span>
-                </div>
-                <ul className="list-disc list-outside pl-4 text-neutral-800 space-y-1 text-xs">
-                  {exp.achievements.map((item, hIdx) => (
-                    <li key={hIdx}>{item}</li>
-                  ))}
-                </ul>
-                <div className="text-[11px] text-neutral-600 font-sans pt-0.5">
-                  <span className="font-semibold text-neutral-700">Technologies: </span>
-                  {exp.skills.join(', ')}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Selected Systems & Open Source Projects */}
-        <div className="mt-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-black border-b-2 border-neutral-900 pb-0.5 mb-3 font-sans">
-            Key Systems & Architecture Projects
-          </h2>
-          <div className="space-y-3">
-            {projects.slice(0, 3).map((proj) => (
-              <div key={proj.id} className="space-y-1">
-                <div className="flex items-baseline justify-between">
-                  <span className="font-bold text-neutral-900 font-sans text-xs">
-                    {proj.title} — <span className="font-normal italic text-neutral-600">{proj.category}</span>
-                  </span>
-                  {proj.githubUrl && (
-                    <span className="text-[11px] font-mono text-neutral-500">{proj.githubUrl}</span>
-                  )}
-                </div>
-                <p className="text-xs text-neutral-800">{proj.description}</p>
-                <div className="text-[11px] text-neutral-600 font-sans">
-                  <span className="font-semibold text-neutral-700">Stack: </span>
-                  {proj.tags.join(', ')}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Education & Credentials */}
-        <div className="mt-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest text-black border-b-2 border-neutral-900 pb-0.5 mb-2 font-sans">
-            Education & Certifications
-          </h2>
-          <div className="flex items-baseline justify-between text-xs">
-            <span className="font-bold text-neutral-900 font-sans">
-              B.S. in Computer Science & Information Engineering
-            </span>
-            <span className="text-neutral-600 italic font-sans">Honors Graduate</span>
-          </div>
-          <div className="text-[11px] text-neutral-700 font-sans mt-0.5">
-            Certified Kubernetes Administrator (CKA) • Google Cloud Certified Professional Cloud Architect
-          </div>
-        </div>
+        <ResumeDocument
+          config={resolvedConfig}
+          labels={labels}
+          presentation="academic"
+          watermark={watermark}
+        />
       </div>
     </div>
   );

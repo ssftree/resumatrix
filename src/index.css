@@ -59,3 +59,43 @@
 .animate-cursor-blink {
   animation: terminal-blink 1s infinite;
 }
+
+/*
+ * Print isolation: [data-resume-document] is the one semantic export node
+ * shared by the Resume modal and the Academic template. When it exists,
+ * hide every sibling in the app instead of relying on each view to opt
+ * itself out with print:hidden, so a new template can't leak into a PDF.
+ */
+@media print {
+  body:has([data-resume-document]) {
+    background: #fff;
+  }
+
+  body:has([data-resume-document]) * {
+    visibility: hidden;
+  }
+
+  body:has([data-resume-document]) [data-resume-document],
+  body:has([data-resume-document]) [data-resume-document] * {
+    visibility: visible;
+  }
+
+  body:has([data-resume-document]) [data-resume-document] {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    color: #000;
+    background: #fff;
+    columns: 1;
+  }
+
+  [data-resume-document] {
+    break-inside: auto;
+  }
+
+  @page {
+    size: A4;
+    margin: 14mm;
+  }
+}

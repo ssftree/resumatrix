@@ -71,4 +71,87 @@ describe('validatePortfolioConfig', () => {
     expect(result.data.contact.github).toBe('https://github.com/example');
     expect(result.data.projects[0].demoUrl).toBe('https://demo.example.test/app');
   });
+
+  it('accepts a config with a resume locale and a validated partial localization', () => {
+    const withLocale = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    withLocale.locale = 'en';
+    withLocale.localizations = {
+      'zh-CN': {
+        label: '中文',
+        labels: { summary: '个人简介' },
+        profile: { bio: '经验丰富的全栈工程师。' },
+        contact: { location: '杭州 / 远程' },
+      },
+    };
+
+    const result = validatePortfolioConfig(withLocale);
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.locale).toBe('en');
+    expect(result.data.localizations?.['zh-CN']).toEqual({
+      label: '中文',
+      labels: { summary: '个人简介' },
+      profile: { bio: '经验丰富的全栈工程师。' },
+      contact: { location: '杭州 / 远程' },
+      skills: undefined,
+      experience: undefined,
+      projects: undefined,
+      education: undefined,
+    });
+  });
+
+  it('rejects a localization with an unsupported resume label key', () => {
+    const withLocale = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    withLocale.localizations = {
+      'zh-CN': { label: '中文', labels: { unsupported: 'x' } },
+    };
+
+    const result = validatePortfolioConfig(withLocale);
+
+    expect(result).toEqual({
+      success: false,
+      error: 'Invalid portfolio configuration: localizations.zh-CN.labels.unsupported is not a supported resume label.',
+    });
+  });
+
+  it('rejects a localization that nests another localizations map', () => {
+    const withLocale = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    withLocale.localizations = {
+      'zh-CN': { label: '中文', localizations: {} },
+    };
+
+    const result = validatePortfolioConfig(withLocale);
+
+    expect(result).toEqual({
+      success: false,
+      error: 'Invalid portfolio configuration: localizations.zh-CN must not contain nested localizations or system data.',
+    });
+  });
+
+  it('rejects an empty-string locale', () => {
+    const withLocale = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    withLocale.locale = '   ';
+
+    const result = validatePortfolioConfig(withLocale);
+
+    expect(result).toEqual({
+      success: false,
+      error: 'Invalid portfolio configuration: locale must be a non-empty string.',
+    });
+  });
+
+  it('rejects an unsafe external URL inside a localized contact override', () => {
+    const withLocale = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as unknown as Record<string, unknown>;
+    withLocale.localizations = {
+      'zh-CN': { label: '中文', contact: { github: 'javascript:alert(1)' } },
+    };
+
+    const result = validatePortfolioConfig(withLocale);
+
+    expect(result).toEqual({
+      success: false,
+      error: 'Invalid portfolio configuration: localizations.zh-CN.contact.github must be an HTTP(S) URL or bare host.',
+    });
+  });
 });

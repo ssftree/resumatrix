@@ -77,6 +77,8 @@ export default function App() {
   const [matrixActive, setMatrixActive] = useState<boolean>(false);
   const [splitMode, setSplitMode] = useState<boolean>(false);
   const [resumeOpen, setResumeOpen] = useState<boolean>(false);
+  // Single commercial seam: flip to 'none' once an entitlement check exists. No payment wiring in this ticket.
+  const [resumeWatermark] = useState<'brand' | 'none'>('brand');
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
 
   const [currentPath, setCurrentPath] = useState<string>('~');
@@ -563,6 +565,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
           config={portfolioConfig}
+          watermark={resumeWatermark}
         />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
@@ -587,9 +590,10 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           />
         </div>
         <div className="pt-10 sm:pt-4">
-          <AcademicView 
+          <AcademicView
             config={portfolioConfig}
-            onSwitchTemplate={setCurrentTemplate} 
+            watermark={resumeWatermark}
+            onSwitchTemplate={setCurrentTemplate}
           />
         </div>
         <ConfigCustomizerModal
@@ -624,6 +628,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
           config={portfolioConfig}
+          watermark={resumeWatermark}
         />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
@@ -659,6 +664,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
           config={portfolioConfig}
+          watermark={resumeWatermark}
         />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
@@ -694,6 +700,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
           onClose={() => setResumeOpen(false)}
           theme={currentTheme}
           config={portfolioConfig}
+          watermark={resumeWatermark}
         />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
@@ -736,6 +743,7 @@ Usage: template <name> (e.g. template retro, template telemetry, template brutal
         onClose={() => setResumeOpen(false)}
         theme={currentTheme}
         config={portfolioConfig}
+        watermark={resumeWatermark}
       />
 
       {/* Portfolio Config Customizer Modal */}

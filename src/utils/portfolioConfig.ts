@@ -4,7 +4,9 @@ import type {
   EducationItem,
   Experience,
   PortfolioConfig,
+  PortfolioLocalization,
   Project,
+  ResumeLabels,
   SkillCategory,
 } from '../types';
 import { normalizeExternalUrl } from './url';
@@ -36,6 +38,15 @@ const readString = (value: unknown, path: string): string | ValidationError =>
 
 const readOptionalString = (value: unknown, path: string): string | undefined | ValidationError =>
   value === undefined ? undefined : readString(value, path);
+
+const readNonEmptyString = (value: unknown, path: string): string | ValidationError => {
+  const result = readString(value, path);
+  if (isFailure(result)) return result;
+  return result.trim() === '' ? invalid(`${path} must be a non-empty string.`) : result;
+};
+
+const readOptionalNonEmptyString = (value: unknown, path: string): string | undefined | ValidationError =>
+  value === undefined ? undefined : readNonEmptyString(value, path);
 
 const readExternalUrl = (value: unknown, path: string): string | ValidationError => {
   const stringValue = readString(value, path);
@@ -124,13 +135,13 @@ const readContact = (value: unknown): ContactInfo | ValidationError => {
   return contact as ContactInfo;
 };
 
-const readSkills = (value: unknown): SkillCategory[] | ValidationError => {
-  if (!Array.isArray(value)) return invalid('skills must be an array.');
+const readSkills = (value: unknown, basePath = 'skills'): SkillCategory[] | ValidationError => {
+  if (!Array.isArray(value)) return invalid(`${basePath} must be an array.`);
 
   const categories: SkillCategory[] = [];
   for (let categoryIndex = 0; categoryIndex < value.length; categoryIndex += 1) {
     const category = value[categoryIndex];
-    const path = `skills[${categoryIndex}]`;
+    const path = `${basePath}[${categoryIndex}]`;
     if (!isRecord(category)) return invalid(`${path} must be an object.`);
 
     const title = readString(category.title, `${path}.title`);
@@ -162,13 +173,13 @@ const readSkills = (value: unknown): SkillCategory[] | ValidationError => {
   return categories;
 };
 
-const readExperience = (value: unknown): Experience[] | ValidationError => {
-  if (!Array.isArray(value)) return invalid('experience must be an array.');
+const readExperience = (value: unknown, basePath = 'experience'): Experience[] | ValidationError => {
+  if (!Array.isArray(value)) return invalid(`${basePath} must be an array.`);
 
   const experience: Experience[] = [];
   for (let index = 0; index < value.length; index += 1) {
     const item = value[index];
-    const path = `experience[${index}]`;
+    const path = `${basePath}[${index}]`;
     if (!isRecord(item)) return invalid(`${path} must be an object.`);
 
     const fields = ['period', 'role', 'company', 'location', 'description'] as const;
@@ -188,14 +199,14 @@ const readExperience = (value: unknown): Experience[] | ValidationError => {
   return experience;
 };
 
-const readProjects = (value: unknown): Project[] | ValidationError => {
-  if (!Array.isArray(value)) return invalid('projects must be an array.');
-  if (value.length === 0) return invalid('projects must include at least one project.');
+const readProjects = (value: unknown, basePath = 'projects'): Project[] | ValidationError => {
+  if (!Array.isArray(value)) return invalid(`${basePath} must be an array.`);
+  if (value.length === 0) return invalid(`${basePath} must include at least one project.`);
 
   const projects: Project[] = [];
   for (let index = 0; index < value.length; index += 1) {
     const item = value[index];
-    const path = `projects[${index}]`;
+    const path = `${basePath}[${index}]`;
     if (!isRecord(item)) return invalid(`${path} must be an object.`);
 
     const fields = ['id', 'title', 'tagline', 'description', 'year'] as const;
@@ -237,14 +248,17 @@ const readProjects = (value: unknown): Project[] | ValidationError => {
   return projects;
 };
 
-const readEducation = (value: unknown): EducationItem[] | undefined | ValidationError => {
+const readEducation = (
+  value: unknown,
+  basePath = 'education',
+): EducationItem[] | undefined | ValidationError => {
   if (value === undefined) return undefined;
-  if (!Array.isArray(value)) return invalid('education must be an array.');
+  if (!Array.isArray(value)) return invalid(`${basePath} must be an array.`);
 
   const education: EducationItem[] = [];
   for (let index = 0; index < value.length; index += 1) {
     const item = value[index];
-    const path = `education[${index}]`;
+    const path = `${basePath}[${index}]`;
     if (!isRecord(item)) return invalid(`${path} must be an object.`);
     const fields = ['degree', 'field', 'institution', 'location', 'period'] as const;
     const entry: Partial<EducationItem> = {};
@@ -274,6 +288,146 @@ const readSystem = (value: unknown): PortfolioConfig['system'] | ValidationError
   return system;
 };
 
+const RESUME_LABEL_KEYS = [
+  'documentTitle',
+  'summary',
+  'skills',
+  'experience',
+  'technologies',
+  'projects',
+  'stack',
+  'education',
+  'print',
+  'watermark',
+] as const;
+
+const readResumeLabels = (
+  value: unknown,
+  path: string,
+): Partial<ResumeLabels> | undefined | ValidationError => {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return invalid(`${path} must be an object.`);
+
+  for (const key of Object.keys(value)) {
+    if (!(RESUME_LABEL_KEYS as readonly string[]).includes(key)) {
+      return invalid(`${path}.${key} is not a supported resume label.`);
+    }
+  }
+
+  const labels: Partial<ResumeLabels> = {};
+  for (const key of RESUME_LABEL_KEYS) {
+    const fieldValue = readOptionalString(value[key], `${path}.${key}`);
+    if (isFailure(fieldValue)) return fieldValue;
+    if (fieldValue !== undefined) labels[key] = fieldValue;
+  }
+  return labels;
+};
+
+const readPartialProfile = (
+  value: unknown,
+  path: string,
+): Partial<DeveloperProfile> | undefined | ValidationError => {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return invalid(`${path} must be an object.`);
+
+  const profile: Partial<DeveloperProfile> = {};
+  for (const key of ['name', 'title', 'location', 'status', 'bio', 'avatarInitials', 'yearsOfExperience'] as const) {
+    if (value[key] === undefined) continue;
+    const fieldValue = readString(value[key], `${path}.${key}`);
+    if (isFailure(fieldValue)) return fieldValue;
+    profile[key] = fieldValue;
+  }
+  return profile;
+};
+
+const readPartialContact = (
+  value: unknown,
+  path: string,
+): Partial<ContactInfo> | undefined | ValidationError => {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return invalid(`${path} must be an object.`);
+
+  const contact: Partial<ContactInfo> = {};
+  for (const key of ['email', 'location'] as const) {
+    if (value[key] === undefined) continue;
+    const fieldValue = readString(value[key], `${path}.${key}`);
+    if (isFailure(fieldValue)) return fieldValue;
+    contact[key] = fieldValue;
+  }
+  for (const key of ['github', 'linkedin', 'twitter', 'blog'] as const) {
+    if (value[key] === undefined) continue;
+    const fieldValue = readExternalUrl(value[key], `${path}.${key}`);
+    if (isFailure(fieldValue)) return fieldValue;
+    contact[key] = fieldValue;
+  }
+  return contact;
+};
+
+const readLocalizations = (
+  value: unknown,
+): Record<string, PortfolioLocalization> | undefined | ValidationError => {
+  if (value === undefined) return undefined;
+  if (!isRecord(value)) return invalid('localizations must be an object.');
+
+  const localizations: Record<string, PortfolioLocalization> = {};
+  for (const key of Object.keys(value)) {
+    if (key.trim() === '') return invalid('localizations keys must be non-empty strings.');
+    const path = `localizations.${key}`;
+    const entry = value[key];
+    if (!isRecord(entry)) return invalid(`${path} must be an object.`);
+    if (entry.localizations !== undefined || entry.system !== undefined) {
+      return invalid(`${path} must not contain nested localizations or system data.`);
+    }
+
+    const label = readNonEmptyString(entry.label, `${path}.label`);
+    if (isFailure(label)) return label;
+
+    const labels = readResumeLabels(entry.labels, `${path}.labels`);
+    if (isFailure(labels)) return labels;
+    const profile = readPartialProfile(entry.profile, `${path}.profile`);
+    if (isFailure(profile)) return profile;
+    const contact = readPartialContact(entry.contact, `${path}.contact`);
+    if (isFailure(contact)) return contact;
+
+    let skills: SkillCategory[] | undefined;
+    if (entry.skills !== undefined) {
+      const result = readSkills(entry.skills, `${path}.skills`);
+      if (isFailure(result)) return result;
+      skills = result;
+    }
+
+    let experience: Experience[] | undefined;
+    if (entry.experience !== undefined) {
+      const result = readExperience(entry.experience, `${path}.experience`);
+      if (isFailure(result)) return result;
+      experience = result;
+    }
+
+    let projects: Project[] | undefined;
+    if (entry.projects !== undefined) {
+      const result = readProjects(entry.projects, `${path}.projects`);
+      if (isFailure(result)) return result;
+      projects = result;
+    }
+
+    const education = readEducation(entry.education, `${path}.education`);
+    if (isFailure(education)) return education;
+
+    localizations[key] = {
+      label: label as string,
+      labels: labels as Partial<ResumeLabels> | undefined,
+      profile: profile as Partial<DeveloperProfile> | undefined,
+      contact: contact as Partial<ContactInfo> | undefined,
+      skills,
+      experience,
+      projects,
+      education: education as EducationItem[] | undefined,
+    };
+  }
+
+  return localizations;
+};
+
 /**
  * Validates untrusted persisted/imported data and returns a fresh, typed copy.
  * The copy also discards unknown fields so all consumers receive one predictable shape.
@@ -288,9 +442,11 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
   const experience = readExperience(value.experience);
   const projects = readProjects(value.projects);
   const education = readEducation(value.education);
+  const locale = readOptionalNonEmptyString(value.locale, 'locale');
+  const localizations = readLocalizations(value.localizations);
   const system = readSystem(value.system);
 
-  for (const result of [version, profile, contact, skills, experience, projects, education, system]) {
+  for (const result of [version, profile, contact, skills, experience, projects, education, locale, localizations, system]) {
     if (isFailure(result)) return result;
   }
 
@@ -304,6 +460,8 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
       experience: experience as Experience[],
       projects: projects as Project[],
       education: education as EducationItem[] | undefined,
+      locale: locale as string | undefined,
+      localizations: localizations as Record<string, PortfolioLocalization> | undefined,
       system: system as PortfolioConfig['system'],
     },
   };

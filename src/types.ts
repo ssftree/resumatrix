@@ -66,6 +66,30 @@ export interface EducationItem {
   notes?: string;
 }
 
+export interface ResumeLabels {
+  documentTitle: string;
+  summary: string;
+  skills: string;
+  experience: string;
+  technologies: string;
+  projects: string;
+  stack: string;
+  education: string;
+  print: string;
+  watermark: string;
+}
+
+export interface PortfolioLocalization {
+  label: string;
+  labels?: Partial<ResumeLabels>;
+  profile?: Partial<DeveloperProfile>;
+  contact?: Partial<ContactInfo>;
+  skills?: SkillCategory[];
+  experience?: Experience[];
+  projects?: Project[];
+  education?: EducationItem[];
+}
+
 export interface PortfolioConfig {
   version: string;
   profile: DeveloperProfile;
@@ -74,6 +98,8 @@ export interface PortfolioConfig {
   experience: Experience[];
   projects: Project[];
   education?: EducationItem[];
+  locale?: string;
+  localizations?: Record<string, PortfolioLocalization>;
   system?: {
     os?: string;
     host?: string;
