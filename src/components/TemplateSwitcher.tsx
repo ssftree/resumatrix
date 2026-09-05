@@ -1,5 +1,14 @@
 import React from 'react';
-import { Terminal, Code2, LayoutGrid, FileText, SlidersHorizontal } from 'lucide-react';
+import { 
+  Terminal, 
+  Code2, 
+  LayoutGrid, 
+  FileText, 
+  SlidersHorizontal,
+  Monitor,
+  Activity,
+  Square
+} from 'lucide-react';
 import { AppTemplate } from '../types';
 
 interface TemplateSwitcherProps {
@@ -33,6 +42,24 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
       badge: 'Modern',
     },
     {
+      id: 'retro',
+      label: 'Retro OS',
+      icon: <Monitor className="w-3.5 h-3.5" />,
+      badge: 'Win95',
+    },
+    {
+      id: 'telemetry',
+      label: 'Telemetry',
+      icon: <Activity className="w-3.5 h-3.5" />,
+      badge: 'Grafana',
+    },
+    {
+      id: 'brutalism',
+      label: 'Brutalism',
+      icon: <Square className="w-3.5 h-3.5" />,
+      badge: 'Swiss',
+    },
+    {
       id: 'academic',
       label: 'LaTeX CV',
       icon: <FileText className="w-3.5 h-3.5" />,
@@ -41,44 +68,46 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
   ];
 
   return (
-    <div className="flex items-center gap-1.5 bg-black/80 backdrop-blur-md p-1.5 rounded-xl border border-neutral-800 shadow-2xl text-xs select-none">
-      <span className="text-[10px] text-neutral-500 font-mono px-1.5 hidden sm:inline-block uppercase tracking-wider">
+    <div className="flex items-center gap-1.5 bg-black/85 backdrop-blur-md p-1.5 rounded-xl border border-neutral-800 shadow-2xl text-xs select-none max-w-full overflow-x-auto scrollbar-none">
+      <span className="text-[10px] text-neutral-500 font-mono px-1 hidden lg:inline-block uppercase tracking-wider shrink-0">
         Style:
       </span>
-      {templates.map((tpl) => {
-        const isActive = currentTemplate === tpl.id;
-        return (
-          <button
-            key={tpl.id}
-            id={`template-switch-${tpl.id}`}
-            onClick={() => onSelectTemplate(tpl.id)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all font-mono ${
-              isActive
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
-                : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 border border-transparent'
-            }`}
-            title={`Switch to ${tpl.label} layout`}
-          >
-            {tpl.icon}
-            <span className="font-medium">{tpl.label}</span>
-            <span
-              className={`text-[9px] px-1 rounded ${
-                isActive ? 'bg-emerald-500/30 text-emerald-300' : 'bg-neutral-800 text-neutral-500'
+      <div className="flex items-center gap-1 shrink-0">
+        {templates.map((tpl) => {
+          const isActive = currentTemplate === tpl.id;
+          return (
+            <button
+              key={tpl.id}
+              id={`template-switch-${tpl.id}`}
+              onClick={() => onSelectTemplate(tpl.id)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all font-mono whitespace-nowrap shrink-0 ${
+                isActive
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-sm'
+                  : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/60 border border-transparent'
               }`}
+              title={`Switch to ${tpl.label} layout`}
             >
-              {tpl.badge}
-            </span>
-          </button>
-        );
-      })}
+              {tpl.icon}
+              <span className="font-medium">{tpl.label}</span>
+              <span
+                className={`text-[9px] px-1 rounded ${
+                  isActive ? 'bg-emerald-500/30 text-emerald-300' : 'bg-neutral-800 text-neutral-500'
+                }`}
+              >
+                {tpl.badge}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
       {onOpenCustomizer && (
         <>
-          <div className="w-[1px] h-4 bg-neutral-800 mx-0.5" />
+          <div className="w-[1px] h-4 bg-neutral-800 mx-0.5 shrink-0" />
           <button
             id="open-customizer-btn"
             onClick={onOpenCustomizer}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 font-mono transition-all"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 border border-emerald-500/30 font-mono transition-all shrink-0 whitespace-nowrap"
             title="Customize personal data, import/export config"
           >
             <SlidersHorizontal className="w-3.5 h-3.5" />

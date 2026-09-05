@@ -1,6 +1,6 @@
 {
   "name": "Terminal Portfolio",
-  "description": "A developer personal homepage with an interactive terminal interface, custom themes, virtual file system, and project showcases.",
+  "description": "A multi-archetype developer portfolio featuring interactive Linux CLI, Retro Win95 Desktop OS, SRE Telemetry Dashboard, Swiss Minimalist Brutalism, Cloud IDE, Bento Grid, and LaTeX CV.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

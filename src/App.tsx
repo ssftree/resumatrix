@@ -23,6 +23,9 @@ import { TemplateSwitcher } from './components/TemplateSwitcher';
 import { IdeView } from './components/templates/IdeView';
 import { BentoView } from './components/templates/BentoView';
 import { AcademicView } from './components/templates/AcademicView';
+import { RetroDesktopView } from './components/templates/RetroDesktopView';
+import { TelemetryView } from './components/templates/TelemetryView';
+import { SwissBrutalismView } from './components/templates/SwissBrutalismView';
 import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
 
@@ -351,12 +354,15 @@ Usage: theme <name> (e.g. theme dracula, theme cyberpunk, theme amber, theme nor
           outputContent = `Active Resume/Portfolio Template: ${currentTemplate}
 
 Available Templates:
-  • terminal  - Interactive Retro CLI Terminal (current)
-  • ide       - Visual Studio Code / Cloud IDE Code Layout
-  • bento     - Modern Raycast / Linear Obsidian Bento Grid
-  • academic  - LaTeX Paper / Print-ready Academic CV
+  • terminal   - Interactive Retro CLI Terminal (current)
+  • ide        - Visual Studio Code / Cloud IDE Code Layout
+  • bento      - Modern Raycast / Linear Obsidian Bento Grid
+  • retro      - Win95 / Classic Retro Desktop OS with Draggable Windows & Minesweeper
+  • telemetry  - Grafana / SRE Engineer Production Metrics Dashboard
+  • brutalism  - Swiss International / Minimalist Brutalism High-Contrast Layout
+  • academic   - LaTeX Paper / Print-ready Academic CV
 
-Usage: template <name> (e.g. template ide, template bento, template academic, template terminal)`;
+Usage: template <name> (e.g. template retro, template telemetry, template brutalism, template ide)`;
         } else {
           const chosen = arg.toLowerCase();
           if (chosen === 'ide' || chosen === 'vscode') {
@@ -367,6 +373,18 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
             setCurrentTemplate('bento');
             outputType = 'success';
             outputContent = `Switching view to Modern Bento Grid...`;
+          } else if (chosen === 'retro' || chosen === 'win95' || chosen === 'desktop' || chosen === 'os') {
+            setCurrentTemplate('retro');
+            outputType = 'success';
+            outputContent = `Switching view to Retro Desktop OS (Win95)...`;
+          } else if (chosen === 'telemetry' || chosen === 'grafana' || chosen === 'sre' || chosen === 'metrics') {
+            setCurrentTemplate('telemetry');
+            outputType = 'success';
+            outputContent = `Switching view to SRE / Engineer Telemetry Dashboard...`;
+          } else if (chosen === 'brutalism' || chosen === 'swiss' || chosen === 'minimal') {
+            setCurrentTemplate('brutalism');
+            outputType = 'success';
+            outputContent = `Switching view to Swiss International Brutalism...`;
           } else if (chosen === 'academic' || chosen === 'latex' || chosen === 'cv' || chosen === 'paper') {
             setCurrentTemplate('academic');
             outputType = 'success';
@@ -377,7 +395,7 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
             outputContent = `Staying in Terminal CLI mode.`;
           } else {
             outputType = 'error';
-            outputContent = `Unknown template '${arg}'. Valid options: terminal, ide, bento, academic`;
+            outputContent = `Unknown template '${arg}'. Valid options: terminal, ide, bento, retro, telemetry, brutalism, academic`;
           }
         }
         break;
@@ -562,6 +580,109 @@ Usage: template <name> (e.g. template ide, template bento, template academic, te
             onSwitchTemplate={setCurrentTemplate} 
           />
         </div>
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
+      </div>
+    );
+  }
+
+  // Render Retro Desktop OS View (Win95 / Classic OS)
+  if (currentTemplate === 'retro') {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <div className="fixed top-3 right-4 z-50 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
+          />
+        </div>
+        <RetroDesktopView
+          config={portfolioConfig}
+          onSwitchTemplate={setCurrentTemplate}
+          onOpenResumeModal={() => setResumeOpen(true)}
+        />
+        <ResumeModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+          theme={currentTheme}
+          config={portfolioConfig}
+        />
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
+      </div>
+    );
+  }
+
+  // Render Telemetry / Grafana SRE Dashboard View
+  if (currentTemplate === 'telemetry') {
+    return (
+      <div className="min-h-screen bg-[#0b0f17] relative">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
+          />
+        </div>
+        <div className="pt-12 sm:pt-4">
+          <TelemetryView
+            config={portfolioConfig}
+            onSwitchTemplate={setCurrentTemplate}
+            onOpenResumeModal={() => setResumeOpen(true)}
+          />
+        </div>
+        <ResumeModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+          theme={currentTheme}
+          config={portfolioConfig}
+        />
+        <ConfigCustomizerModal
+          isOpen={configModalOpen}
+          onClose={() => setConfigModalOpen(false)}
+          config={portfolioConfig}
+          onSaveConfig={handleSaveConfig}
+          onResetConfig={handleResetConfig}
+        />
+      </div>
+    );
+  }
+
+  // Render Swiss Brutalism View
+  if (currentTemplate === 'brutalism') {
+    return (
+      <div className="min-h-screen relative">
+        <div className="fixed top-3 right-4 z-40 print:hidden">
+          <TemplateSwitcher
+            currentTemplate={currentTemplate}
+            onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
+            onOpenCustomizer={() => setConfigModalOpen(true)}
+          />
+        </div>
+        <div className="pt-10 sm:pt-4">
+          <SwissBrutalismView
+            config={portfolioConfig}
+            onSwitchTemplate={setCurrentTemplate}
+            onOpenResumeModal={() => setResumeOpen(true)}
+          />
+        </div>
+        <ResumeModal
+          isOpen={resumeOpen}
+          onClose={() => setResumeOpen(false)}
+          theme={currentTheme}
+          config={portfolioConfig}
+        />
         <ConfigCustomizerModal
           isOpen={configModalOpen}
           onClose={() => setConfigModalOpen(false)}

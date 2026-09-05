@@ -109,7 +109,7 @@ export interface TerminalHistoryItem {
 
 export type ThemeKey = 'matrix' | 'dracula' | 'cyberpunk' | 'nord' | 'monokai' | 'amber' | 'light';
 
-export type AppTemplate = 'terminal' | 'ide' | 'bento' | 'academic';
+export type AppTemplate = 'terminal' | 'ide' | 'bento' | 'academic' | 'retro' | 'telemetry' | 'brutalism';
 
 export interface ThemeConfig {
   id: ThemeKey;
