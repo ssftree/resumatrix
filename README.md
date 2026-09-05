@@ -1,6 +1,6 @@
 **English | [简体中文](./README.zh-CN.md)**
 
-# Terminal Portfolio
+# Resumatrix
 
 An interactive developer portfolio built with React + Vite. The same resume data can be rendered as seven distinct presentations: Terminal, Cloud IDE, Bento Grid, Retro OS, Telemetry, Swiss Brutalism, and Academic CV.
 

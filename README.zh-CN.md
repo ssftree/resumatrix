@@ -1,6 +1,6 @@
 **[English](./README.md) | 简体中文**
 
-# Terminal Portfolio
+# Resumatrix
 
 一个由 React + Vite 构建的交互式开发者作品集。同一份履历数据可以切换为 Terminal、Cloud IDE、Bento Grid、Retro OS、Telemetry、Swiss Brutalism 和 Academic CV 七种展示形式。
 
