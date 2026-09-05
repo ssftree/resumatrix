@@ -4,6 +4,12 @@
 
 An interactive developer portfolio built with React + Vite. The same resume data can be rendered as seven distinct presentations: Terminal, Cloud IDE, Bento Grid, Retro OS, Telemetry, Swiss Brutalism, and Academic CV.
 
+## Preview
+
+| Terminal | Bento Grid | Telemetry |
+| --- | --- | --- |
+| ![Terminal template screenshot](./public/assets/screenshots/terminal.png) | ![Bento Grid template screenshot](./public/assets/screenshots/bento.png) | ![Telemetry template screenshot](./public/assets/screenshots/telemetry.png) |
+
 ## Features
 
 - Interactive terminal: command history, autocomplete, a virtual file system, project details, and multiple themes
