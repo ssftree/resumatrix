@@ -412,7 +412,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             outputContent = `Staying in Terminal CLI mode.`;
           } else {
             outputType = 'error';
-            outputContent = `Unknown template '${arg}'. Valid options: terminal, ide, bento, retro, telemetry, devops, brutalism, academic`;
+            outputContent = `Unknown template '${arg}'. Valid options: terminal, retro, telemetry, devops, brutalism, academic, bento, ide`;
           }
         }
         break;

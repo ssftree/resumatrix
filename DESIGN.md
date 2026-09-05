@@ -1,8 +1,8 @@
-# Terminal Portfolio — Design and Architecture
+# Resumatrix — Design and Architecture
 
 ## Product intent
 
-Terminal Portfolio presents one developer profile through eight deliberately different interfaces. The content should remain consistent while each view demonstrates a different design vocabulary:
+Resumatrix presents one developer profile through eight deliberately different interfaces. The content should remain consistent while each view demonstrates a different design vocabulary:
 
 | Template | Purpose | Visual language |
 | --- | --- | --- |
