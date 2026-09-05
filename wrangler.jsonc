@@ -1,8 +1,4 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "terminal-website",
-  "compatibility_date": "2025-01-01",
-  "assets": {
-    "directory": "./dist"
-  }
+  "pages_build_output_dir": "./dist"
 }

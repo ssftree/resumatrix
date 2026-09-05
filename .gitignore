@@ -1,5 +1,7 @@
 node_modules/
 .worktrees/
+.vercel/
+.wrangler/
 build/
 dist/
 coverage/
