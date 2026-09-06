@@ -1,20 +1,31 @@
 import React, { useRef, useState } from 'react';
-import { 
-  X, 
-  Download, 
-  Upload, 
-  RotateCcw, 
-  Check, 
-  Copy, 
-  Sparkles, 
-  FileCode, 
-  User, 
-  Layers, 
-  Briefcase, 
-  Cpu, 
-  AlertCircle
+import {
+  X,
+  Download,
+  Upload,
+  RotateCcw,
+  Check,
+  Copy,
+  Sparkles,
+  FileCode,
+  User,
+  Layers,
+  Briefcase,
+  Cpu,
+  AlertCircle,
+  Plus,
+  Trash2,
+  GraduationCap,
+  Server,
 } from 'lucide-react';
-import { PortfolioConfig } from '../types';
+import {
+  PortfolioConfig,
+  Project,
+  SkillCategory,
+  Experience,
+  EducationItem,
+  DeveloperProfile,
+} from '../types';
 import { PRESET_CONFIGS } from '../portfolio.config';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { parsePortfolioConfigJson } from '../utils/portfolioConfig';
@@ -26,6 +37,75 @@ interface ConfigCustomizerModalProps {
   onSaveConfig: (newConfig: PortfolioConfig) => void;
   onResetConfig: () => void;
 }
+
+const PROJECT_CATEGORIES: Project['category'][] = [
+  'Full-Stack',
+  'CLI & Systems',
+  'AI & Tools',
+  'Graphics & Web',
+];
+
+const SYSTEM_FIELDS: (keyof NonNullable<PortfolioConfig['system']>)[] = [
+  'os',
+  'host',
+  'kernel',
+  'uptime',
+  'shell',
+  'resolution',
+  'wm',
+  'terminal',
+  'cpu',
+  'memory',
+];
+
+const inputClass =
+  'w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500';
+
+const Field: React.FC<{
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  type?: string;
+  placeholder?: string;
+}> = ({ label, value, onChange, type = 'text', placeholder }) => (
+  <div>
+    <label className="block text-neutral-400 mb-1 font-mono">{label}</label>
+    <input
+      type={type}
+      value={value}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      className={inputClass}
+    />
+  </div>
+);
+
+const TextAreaField: React.FC<{
+  label: string;
+  value: string;
+  onChange: (val: string) => void;
+  rows?: number;
+  hint?: string;
+}> = ({ label, value, onChange, rows = 3, hint }) => (
+  <div>
+    <label className="block text-neutral-400 mb-1 font-mono">
+      {label}
+      {hint && <span className="text-neutral-600 ml-2 normal-case">{hint}</span>}
+    </label>
+    <textarea
+      rows={rows}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${inputClass} leading-relaxed`}
+    />
+  </div>
+);
+
+const addButtonClass =
+  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-500 text-white font-medium transition-colors text-xs';
+
+const iconButtonClass =
+  'p-1.5 rounded-md text-neutral-500 hover:text-red-400 hover:bg-red-500/10 transition-colors';
 
 export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
   isOpen,
@@ -58,6 +138,12 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
   });
 
   if (!isOpen) return null;
+
+  // Single source of truth for mutations: update the local draft and persist it.
+  const commit = (next: PortfolioConfig) => {
+    setDraft(next);
+    onSaveConfig(next);
+  };
 
   const handleApplyPreset = (presetKey: string) => {
     const selected = PRESET_CONFIGS[presetKey]?.config;
@@ -117,33 +203,70 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
     setJsonError(null);
   };
 
-  const handleProfileFieldChange = (field: keyof typeof draft.profile, val: string) => {
-    const next = {
-      ...draft,
-      profile: {
-        ...draft.profile,
-        [field]: val,
-      },
-    };
-    setDraft(next);
-    onSaveConfig(next);
+  const handleProfileFieldChange = (field: keyof DeveloperProfile, val: string) => {
+    commit({ ...draft, profile: { ...draft.profile, [field]: val } });
   };
 
   const handleContactFieldChange = (field: keyof typeof draft.contact, val: string) => {
-    const next = {
-      ...draft,
-      contact: {
-        ...draft.contact,
-        [field]: val,
-      },
-    };
-    setDraft(next);
-    onSaveConfig(next);
+    commit({ ...draft, contact: { ...draft.contact, [field]: val } });
   };
+
+  // ---- Profile stats -------------------------------------------------------
+  const stats = draft.profile.stats ?? [];
+  const setStats = (nextStats: NonNullable<DeveloperProfile['stats']>) =>
+    commit({ ...draft, profile: { ...draft.profile, stats: nextStats } });
+  const updateStat = (idx: number, patch: Partial<{ metric: string; label: string }>) =>
+    setStats(stats.map((s, i) => (i === idx ? { ...s, ...patch } : s)));
+
+  // ---- Education ----------------------------------------------------------
+  const education = draft.education ?? [];
+  const setEducation = (next: EducationItem[]) => commit({ ...draft, education: next });
+  const updateEducation = (idx: number, patch: Partial<EducationItem>) =>
+    setEducation(education.map((e, i) => (i === idx ? { ...e, ...patch } : e)));
+
+  // ---- System (neofetch) -------------------------------------------------
+  const system = draft.system ?? {};
+  const updateSystem = (field: keyof NonNullable<PortfolioConfig['system']>, val: string) =>
+    commit({ ...draft, system: { ...system, [field]: val } });
+
+  // ---- Skills ----------------------------------------------------------
+  const setSkills = (next: SkillCategory[]) => commit({ ...draft, skills: next });
+  const updateSkillGroup = (gIdx: number, patch: Partial<SkillCategory>) =>
+    setSkills(draft.skills.map((g, i) => (i === gIdx ? { ...g, ...patch } : g)));
+  const updateSkill = (
+    gIdx: number,
+    sIdx: number,
+    patch: Partial<SkillCategory['skills'][number]>,
+  ) =>
+    updateSkillGroup(gIdx, {
+      skills: draft.skills[gIdx].skills.map((s, i) => (i === sIdx ? { ...s, ...patch } : s)),
+    });
+
+  // ---- Experience ----------------------------------------------------------
+  const setExperience = (next: Experience[]) => commit({ ...draft, experience: next });
+  const updateExperience = (idx: number, patch: Partial<Experience>) =>
+    setExperience(draft.experience.map((e, i) => (i === idx ? { ...e, ...patch } : e)));
+
+  // ---- Projects ----------------------------------------------------------
+  const setProjects = (next: Project[]) => commit({ ...draft, projects: next });
+  const updateProject = (idx: number, patch: Partial<Project>) =>
+    setProjects(draft.projects.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
+
+  // Keep raw lines (including blanks) so pressing Enter mid-edit is not swallowed
+  // by the config round-trip; blank-only lists collapse to an empty array.
+  const toList = (value: string) => {
+    const lines = value.split('\n');
+    return lines.every((line) => line.trim() === '') ? [] : lines;
+  };
+  const toTokens = (value: string) =>
+    value
+      .split(',')
+      .map((token) => token.trim())
+      .filter(Boolean);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div 
+      <div
         ref={dialogRef}
         id="config-customizer-modal"
         role="dialog"
@@ -240,62 +363,94 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
                   Personal Identity
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Display Name</label>
-                    <input
-                      type="text"
-                      value={draft.profile.name}
-                      onChange={(e) => handleProfileFieldChange('name', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Avatar Initials</label>
-                    <input
-                      type="text"
-                      value={draft.profile.avatarInitials || ''}
-                      onChange={(e) => handleProfileFieldChange('avatarInitials', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Professional Title</label>
-                    <input
-                      type="text"
-                      value={draft.profile.title}
-                      onChange={(e) => handleProfileFieldChange('title', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Location / Timezone</label>
-                    <input
-                      type="text"
-                      value={draft.profile.location}
-                      onChange={(e) => handleProfileFieldChange('location', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-mono">Availability Status Badge</label>
-                  <input
-                    type="text"
+                  <Field
+                    label="Display Name"
+                    value={draft.profile.name}
+                    onChange={(v) => handleProfileFieldChange('name', v)}
+                  />
+                  <Field
+                    label="Avatar Initials"
+                    value={draft.profile.avatarInitials || ''}
+                    onChange={(v) => handleProfileFieldChange('avatarInitials', v)}
+                  />
+                  <Field
+                    label="Professional Title"
+                    value={draft.profile.title}
+                    onChange={(v) => handleProfileFieldChange('title', v)}
+                  />
+                  <Field
+                    label="Location / Timezone"
+                    value={draft.profile.location}
+                    onChange={(v) => handleProfileFieldChange('location', v)}
+                  />
+                  <Field
+                    label="Years of Experience"
+                    value={draft.profile.yearsOfExperience || ''}
+                    onChange={(v) => handleProfileFieldChange('yearsOfExperience', v)}
+                    placeholder="6+ Years"
+                  />
+                  <Field
+                    label="Availability Status Badge"
                     value={draft.profile.status}
-                    onChange={(e) => handleProfileFieldChange('status', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
+                    onChange={(v) => handleProfileFieldChange('status', v)}
                   />
                 </div>
 
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-mono">Bio & Executive Summary</label>
-                  <textarea
-                    rows={4}
-                    value={draft.profile.bio}
-                    onChange={(e) => handleProfileFieldChange('bio', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 leading-relaxed"
-                  />
+                <TextAreaField
+                  label="Bio & Executive Summary"
+                  value={draft.profile.bio}
+                  onChange={(v) => handleProfileFieldChange('bio', v)}
+                  rows={4}
+                />
+              </div>
+
+              {/* Headline stats */}
+              <div className="space-y-3 pt-4 border-t border-neutral-800">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-mono text-sm font-semibold text-emerald-400 uppercase tracking-wider">
+                    Headline Stats
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setStats([...stats, { metric: '', label: '' }])}
+                    className={addButtonClass}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Stat</span>
+                  </button>
+                </div>
+                {stats.length === 0 && (
+                  <p className="text-neutral-500 text-[11px]">No headline stats yet.</p>
+                )}
+                <div className="space-y-2">
+                  {stats.map((stat, idx) => (
+                    <div key={idx} className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <Field
+                          label="Metric"
+                          value={stat.metric}
+                          onChange={(v) => updateStat(idx, { metric: v })}
+                          placeholder="50+"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <Field
+                          label="Label"
+                          value={stat.label}
+                          onChange={(v) => updateStat(idx, { label: v })}
+                          placeholder="Projects shipped"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={`Remove stat ${idx + 1}`}
+                        onClick={() => setStats(stats.filter((_, i) => i !== idx))}
+                        className={iconButtonClass}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
               </div>
 
@@ -304,42 +459,108 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
                   Contact & Social Graph
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Email Address</label>
-                    <input
-                      type="text"
-                      value={draft.contact.email}
-                      onChange={(e) => handleContactFieldChange('email', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
+                  <Field
+                    label="Email Address"
+                    value={draft.contact.email}
+                    onChange={(v) => handleContactFieldChange('email', v)}
+                  />
+                  <Field
+                    label="Location"
+                    value={draft.contact.location}
+                    onChange={(v) => handleContactFieldChange('location', v)}
+                  />
+                  <Field
+                    label="GitHub Profile Link"
+                    value={draft.contact.github}
+                    onChange={(v) => handleContactFieldChange('github', v)}
+                  />
+                  <Field
+                    label="LinkedIn URL"
+                    value={draft.contact.linkedin}
+                    onChange={(v) => handleContactFieldChange('linkedin', v)}
+                  />
+                  <Field
+                    label="Twitter / X URL"
+                    value={draft.contact.twitter}
+                    onChange={(v) => handleContactFieldChange('twitter', v)}
+                  />
+                  <Field
+                    label="Blog / Website URL"
+                    value={draft.contact.blog}
+                    onChange={(v) => handleContactFieldChange('blog', v)}
+                  />
+                </div>
+                <p className="text-neutral-600 text-[11px]">
+                  Social links must be HTTP(S) URLs or bare hosts; other values are dropped on reload.
+                </p>
+              </div>
+
+              {/* Education */}
+              <div className="space-y-3 pt-4 border-t border-neutral-800">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-mono text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4" />
+                    Education
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setEducation([
+                        ...education,
+                        { degree: '', field: '', institution: '', location: '', period: '', notes: '' },
+                      ])
+                    }
+                    className={addButtonClass}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Entry</span>
+                  </button>
+                </div>
+                {education.length === 0 && (
+                  <p className="text-neutral-500 text-[11px]">No education entries yet.</p>
+                )}
+                <div className="space-y-3">
+                  {education.map((item, idx) => (
+                    <div key={idx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-neutral-500 font-mono text-[11px]">Entry {idx + 1}</span>
+                        <button
+                          type="button"
+                          aria-label={`Remove education entry ${idx + 1}`}
+                          onClick={() => setEducation(education.filter((_, i) => i !== idx))}
+                          className={iconButtonClass}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Field label="Degree" value={item.degree} onChange={(v) => updateEducation(idx, { degree: v })} />
+                        <Field label="Field of Study" value={item.field} onChange={(v) => updateEducation(idx, { field: v })} />
+                        <Field label="Institution" value={item.institution} onChange={(v) => updateEducation(idx, { institution: v })} />
+                        <Field label="Location" value={item.location} onChange={(v) => updateEducation(idx, { location: v })} />
+                        <Field label="Period" value={item.period} onChange={(v) => updateEducation(idx, { period: v })} placeholder="2016 – 2020" />
+                        <Field label="Notes (optional)" value={item.notes || ''} onChange={(v) => updateEducation(idx, { notes: v })} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* System / neofetch */}
+              <div className="space-y-3 pt-4 border-t border-neutral-800">
+                <h3 className="font-mono text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                  <Server className="w-4 h-4" />
+                  System (neofetch)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {SYSTEM_FIELDS.map((field) => (
+                    <Field
+                      key={field}
+                      label={field}
+                      value={system[field] || ''}
+                      onChange={(v) => updateSystem(field, v)}
                     />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">GitHub Profile Link</label>
-                    <input
-                      type="text"
-                      value={draft.contact.github}
-                      onChange={(e) => handleContactFieldChange('github', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">LinkedIn URL</label>
-                    <input
-                      type="text"
-                      value={draft.contact.linkedin}
-                      onChange={(e) => handleContactFieldChange('linkedin', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-neutral-400 mb-1 font-mono">Twitter / X URL</label>
-                    <input
-                      type="text"
-                      value={draft.contact.twitter}
-                      onChange={(e) => handleContactFieldChange('twitter', e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500"
-                    />
-                  </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -352,73 +573,212 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
                 <span className="text-neutral-400">
                   Total featured projects: <strong className="text-white">{draft.projects.length}</strong>
                 </span>
-                <span className="text-[11px] font-mono text-neutral-500">
-                  Tip: Use the "Raw JSON" tab to bulk edit or import items.
-                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setProjects([
+                      ...draft.projects,
+                      {
+                        id: `project-${Date.now()}`,
+                        title: 'New Project',
+                        tagline: '',
+                        description: '',
+                        category: 'Full-Stack',
+                        tags: [],
+                        year: String(new Date().getFullYear()),
+                        highlights: [],
+                      },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Project</span>
+                </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {draft.projects.map((proj, idx) => (
-                  <div key={proj.id || idx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <input
-                        type="text"
-                        value={proj.title}
-                        onChange={(e) => {
-                          const updated = [...draft.projects];
-                          updated[idx] = { ...updated[idx], title: e.target.value };
-                          const next = { ...draft, projects: updated };
-                          setDraft(next);
-                          onSaveConfig(next);
-                        }}
-                        className="font-bold text-white bg-transparent border-b border-transparent hover:border-neutral-600 focus:border-emerald-500 focus:outline-none text-xs"
-                      />
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-neutral-800 text-neutral-400">
-                        {proj.category}
-                      </span>
+                  <div key={proj.id || idx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-neutral-500 font-mono text-[11px]">Project {idx + 1}</span>
+                      <button
+                        type="button"
+                        aria-label={`Remove project ${idx + 1}`}
+                        disabled={draft.projects.length <= 1}
+                        onClick={() => setProjects(draft.projects.filter((_, i) => i !== idx))}
+                        className={`${iconButtonClass} disabled:opacity-30 disabled:cursor-not-allowed`}
+                        title={draft.projects.length <= 1 ? 'At least one project is required' : undefined}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                    <textarea
-                      rows={2}
+                    <Field label="Title" value={proj.title} onChange={(v) => updateProject(idx, { title: v })} />
+                    <Field label="Tagline" value={proj.tagline} onChange={(v) => updateProject(idx, { tagline: v })} />
+                    <TextAreaField
+                      label="Description"
                       value={proj.description}
-                      onChange={(e) => {
-                        const updated = [...draft.projects];
-                        updated[idx] = { ...updated[idx], description: e.target.value };
-                        const next = { ...draft, projects: updated };
-                        setDraft(next);
-                        onSaveConfig(next);
-                      }}
-                      className="w-full text-neutral-300 text-[11px] bg-black/30 p-1.5 rounded border border-neutral-800 focus:outline-none focus:border-neutral-600"
+                      onChange={(v) => updateProject(idx, { description: v })}
+                      rows={2}
                     />
-                    <div className="flex flex-wrap gap-1">
-                      {proj.tags.map((t) => (
-                        <span key={t} className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-neutral-900 text-neutral-400 border border-neutral-800">
-                          {t}
-                        </span>
-                      ))}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-neutral-400 mb-1 font-mono">Category</label>
+                        <select
+                          value={proj.category}
+                          onChange={(e) => updateProject(idx, { category: e.target.value as Project['category'] })}
+                          className={inputClass}
+                        >
+                          {PROJECT_CATEGORIES.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <Field label="Year" value={proj.year} onChange={(v) => updateProject(idx, { year: v })} />
                     </div>
+                    <Field
+                      label="Demo URL (optional)"
+                      value={proj.demoUrl || ''}
+                      onChange={(v) => updateProject(idx, { demoUrl: v })}
+                    />
+                    <Field
+                      label="GitHub URL (optional)"
+                      value={proj.githubUrl || ''}
+                      onChange={(v) => updateProject(idx, { githubUrl: v })}
+                    />
+                    <Field
+                      label="Tags"
+                      value={proj.tags.join(', ')}
+                      onChange={(v) => updateProject(idx, { tags: toTokens(v) })}
+                      placeholder="React, TypeScript, Rust"
+                    />
+                    <TextAreaField
+                      label="Highlights"
+                      hint="one per line"
+                      value={proj.highlights.join('\n')}
+                      onChange={(v) => updateProject(idx, { highlights: toList(v) })}
+                      rows={3}
+                    />
                   </div>
                 ))}
               </div>
+              <p className="text-neutral-600 text-[11px]">
+                Demo / GitHub URLs must be HTTP(S) links; other values are dropped on reload.
+              </p>
             </div>
           )}
 
           {/* TAB 3: Skills */}
           {activeTab === 'skills' && (
             <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-400">
+                  {draft.skills.length} skill groups
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSkills([...draft.skills, { title: 'New Group', icon: '', skills: [] }])}
+                  className={addButtonClass}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Group</span>
+                </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {draft.skills.map((group, gIdx) => (
-                  <div key={group.title || gIdx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
-                    <div className="font-semibold text-emerald-400 font-mono flex items-center justify-between">
-                      <span>{group.title}</span>
-                      <span className="text-[10px] text-neutral-500">{group.skills.length} competencies</span>
+                  <div key={gIdx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <Field
+                          label="Group Title"
+                          value={group.title}
+                          onChange={(v) => updateSkillGroup(gIdx, { title: v })}
+                        />
+                      </div>
+                      <div className="w-24">
+                        <Field
+                          label="Icon"
+                          value={group.icon}
+                          onChange={(v) => updateSkillGroup(gIdx, { icon: v })}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={`Remove skill group ${gIdx + 1}`}
+                        onClick={() => setSkills(draft.skills.filter((_, i) => i !== gIdx))}
+                        className={iconButtonClass}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                       {group.skills.map((s, sIdx) => (
-                        <div key={s.name || sIdx} className="flex items-center justify-between text-[11px] bg-neutral-900/80 px-2.5 py-1.5 rounded border border-neutral-800">
-                          <span className="text-neutral-200">{s.name}</span>
-                          <span className="text-emerald-400 font-mono font-bold">{s.level}%</span>
+                        <div key={sIdx} className="p-2.5 rounded-lg bg-neutral-900/80 border border-neutral-800 space-y-2">
+                          <div className="flex items-end gap-2">
+                            <div className="flex-1">
+                              <Field
+                                label="Name"
+                                value={s.name}
+                                onChange={(v) => updateSkill(gIdx, sIdx, { name: v })}
+                              />
+                            </div>
+                            <div className="w-20">
+                              <label className="block text-neutral-400 mb-1 font-mono">Level</label>
+                              <input
+                                type="number"
+                                min={0}
+                                max={100}
+                                value={Number.isFinite(s.level) ? s.level : 0}
+                                onChange={(e) => {
+                                  const parsed = Number(e.target.value);
+                                  updateSkill(gIdx, sIdx, {
+                                    level: Number.isFinite(parsed) ? Math.min(100, Math.max(0, parsed)) : 0,
+                                  });
+                                }}
+                                className={inputClass}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              aria-label={`Remove skill ${sIdx + 1} from ${group.title}`}
+                              onClick={() =>
+                                updateSkillGroup(gIdx, {
+                                  skills: group.skills.filter((_, i) => i !== sIdx),
+                                })
+                              }
+                              className={iconButtonClass}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            <Field
+                              label="Category (optional)"
+                              value={s.category || ''}
+                              onChange={(v) => updateSkill(gIdx, sIdx, { category: v })}
+                            />
+                            <Field
+                              label="Note (optional)"
+                              value={s.note || ''}
+                              onChange={(v) => updateSkill(gIdx, sIdx, { note: v })}
+                            />
+                          </div>
                         </div>
                       ))}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          updateSkillGroup(gIdx, {
+                            skills: [...group.skills, { name: '', level: 50 }],
+                          })
+                        }
+                        className="flex items-center gap-1.5 text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add competency</span>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -429,19 +789,68 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
           {/* TAB 4: Experience */}
           {activeTab === 'experience' && (
             <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-400">{draft.experience.length} roles</span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setExperience([
+                      ...draft.experience,
+                      {
+                        period: '',
+                        role: '',
+                        company: '',
+                        location: '',
+                        description: '',
+                        achievements: [],
+                        skills: [],
+                      },
+                    ])
+                  }
+                  className={addButtonClass}
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Role</span>
+                </button>
+              </div>
               {draft.experience.map((exp, idx) => (
-                <div key={idx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-2">
+                <div key={idx} className="p-4 rounded-xl bg-black/40 border border-neutral-800 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-xs">{exp.role}</span>
-                    <span className="text-neutral-400 font-mono text-[11px]">{exp.period}</span>
+                    <span className="text-neutral-500 font-mono text-[11px]">Role {idx + 1}</span>
+                    <button
+                      type="button"
+                      aria-label={`Remove role ${idx + 1}`}
+                      onClick={() => setExperience(draft.experience.filter((_, i) => i !== idx))}
+                      className={iconButtonClass}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div className="text-emerald-400 font-mono text-[11px]">{exp.company} • {exp.location}</div>
-                  <p className="text-neutral-300 text-[11px]">{exp.description}</p>
-                  <ul className="list-disc list-inside text-neutral-400 text-[11px] space-y-0.5 pt-1">
-                    {exp.achievements.map((ach, aIdx) => (
-                      <li key={aIdx}>{ach}</li>
-                    ))}
-                  </ul>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <Field label="Role" value={exp.role} onChange={(v) => updateExperience(idx, { role: v })} />
+                    <Field label="Period" value={exp.period} onChange={(v) => updateExperience(idx, { period: v })} placeholder="2021 – Present" />
+                    <Field label="Company" value={exp.company} onChange={(v) => updateExperience(idx, { company: v })} />
+                    <Field label="Location" value={exp.location} onChange={(v) => updateExperience(idx, { location: v })} />
+                  </div>
+                  <TextAreaField
+                    label="Description"
+                    value={exp.description}
+                    onChange={(v) => updateExperience(idx, { description: v })}
+                    rows={2}
+                  />
+                  <TextAreaField
+                    label="Achievements"
+                    hint="one per line"
+                    value={exp.achievements.join('\n')}
+                    onChange={(v) => updateExperience(idx, { achievements: toList(v) })}
+                    rows={3}
+                  />
+                  <Field
+                    label="Skills"
+                    value={exp.skills.join(', ')}
+                    onChange={(v) => updateExperience(idx, { skills: toTokens(v) })}
+                    placeholder="TypeScript, Kubernetes, Go"
+                  />
                 </div>
               ))}
             </div>
