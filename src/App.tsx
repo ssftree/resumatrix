@@ -26,16 +26,29 @@ import { TelemetryView } from './components/templates/TelemetryView';
 import { DevOpsControlView } from './components/templates/DevOpsControlView';
 import { SwissBrutalismView } from './components/templates/SwissBrutalismView';
 import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
+import { MadeWithBadge } from './components/MadeWithBadge';
+import type { ShareContext } from './components/SocialShareMenu';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
-import { parsePortfolioConfigJson } from './utils/portfolioConfig';
+import {
+  createPortfolioShareHash,
+  createTemplateShareHash,
+  parsePortfolioConfigJson,
+  parsePortfolioShareHash,
+  parseTemplateShareHash,
+} from './utils/portfolioConfig';
 
 export default function App() {
-  const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>('terminal');
+  const [sharedPortfolio] = useState(() => parsePortfolioShareHash(window.location.hash));
+  const [sharedTemplate] = useState(() => parseTemplateShareHash(window.location.hash));
+  const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>(() =>
+    sharedPortfolio.success ? sharedPortfolio.data.template : sharedTemplate ?? 'terminal',
+  );
   const [themeKey, setThemeKey] = useState<ThemeKey>('matrix');
   const currentTheme: ThemeConfig = THEMES[themeKey];
 
   // Portfolio data-driven config state with localStorage persistence
   const [portfolioConfig, setPortfolioConfig] = useState<PortfolioConfig>(() => {
+    if (sharedPortfolio.success) return sharedPortfolio.data.config;
     try {
       const saved = localStorage.getItem('portfolio_config_v2');
       if (saved) {
@@ -71,6 +84,16 @@ export default function App() {
     } catch (e) {
       console.error('Failed to reset config in localStorage', e);
     }
+  };
+
+  const buildShareContext = (): ShareContext => {
+    const baseUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    return {
+      url: `${baseUrl}${createTemplateShareHash(currentTemplate)}`,
+      deepLinkUrl: `${baseUrl}${createPortfolioShareHash(currentTemplate, portfolioConfig)}`,
+      title: `${portfolioConfig.profile.name} — ${portfolioConfig.profile.title}`,
+      text: `View ${portfolioConfig.profile.name}'s portfolio in the ${currentTemplate} theme.`,
+    };
   };
 
   const [crtEnabled, setCrtEnabled] = useState<boolean>(true);
@@ -565,8 +588,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <div className="max-w-7xl mx-auto w-full pt-10 sm:pt-2">
           <IdeView 
             config={portfolioConfig}
@@ -593,8 +618,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <div className="pt-10 sm:pt-4">
           <BentoView 
             config={portfolioConfig}
@@ -628,8 +655,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <div className="pt-10 sm:pt-4">
           <AcademicView 
             config={portfolioConfig}
@@ -656,8 +685,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <RetroDesktopView
           config={portfolioConfig}
           onSwitchTemplate={setCurrentTemplate}
@@ -689,8 +720,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <div className="pt-12 sm:pt-4">
           <TelemetryView
             config={portfolioConfig}
@@ -724,8 +757,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <DevOpsControlView
           config={portfolioConfig}
           onSwitchTemplate={setCurrentTemplate}
@@ -750,8 +785,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
+            getShareContext={buildShareContext}
           />
         </div>
+        {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
         <div className="pt-10 sm:pt-4">
           <SwissBrutalismView
             config={portfolioConfig}
@@ -790,8 +827,10 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
           currentTemplate={currentTemplate}
           onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
           onOpenCustomizer={() => setConfigModalOpen(true)}
+          getShareContext={buildShareContext}
         />
       </div>
+      {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
 
       {/* Optional Matrix Rain Screen */}
       <MatrixRain

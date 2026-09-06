@@ -1,27 +1,30 @@
 import React from 'react';
-import { 
-  Terminal, 
-  Code2, 
-  LayoutGrid, 
-  FileText, 
+import {
+  Terminal,
+  Code2,
+  LayoutGrid,
+  FileText,
   SlidersHorizontal,
   Monitor,
   Activity,
   GitBranch,
-  Square
+  Square,
 } from 'lucide-react';
 import { AppTemplate } from '../types';
+import { SocialShareMenu, ShareContext } from './SocialShareMenu';
 
 interface TemplateSwitcherProps {
   currentTemplate: AppTemplate;
   onSelectTemplate: (template: AppTemplate) => void;
   onOpenCustomizer?: () => void;
+  getShareContext?: () => ShareContext;
 }
 
 export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
   currentTemplate,
   onSelectTemplate,
   onOpenCustomizer,
+  getShareContext,
 }) => {
   const templates: { id: AppTemplate; label: string; icon: React.ReactNode; badge: string }[] = [
     {
@@ -125,6 +128,13 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
             <SlidersHorizontal className="w-3.5 h-3.5" />
             <span className="font-medium">Customize</span>
           </button>
+        </>
+      )}
+
+      {getShareContext && (
+        <>
+          <div className="w-[1px] h-4 bg-neutral-800 mx-0.5 shrink-0" />
+          <SocialShareMenu getShareContext={getShareContext} />
         </>
       )}
     </nav>

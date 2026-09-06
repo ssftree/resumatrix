@@ -15,6 +15,7 @@ describe('App browser state integration', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    window.history.replaceState(null, '', '/');
     fullscreenElement = null;
     Element.prototype.scrollIntoView = vi.fn();
     Object.defineProperty(document, 'fullscreenElement', {
@@ -38,6 +39,7 @@ describe('App browser state integration', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('tracks fullscreen changes initiated outside the app button', async () => {
@@ -169,5 +171,72 @@ describe('App browser state integration', () => {
     fireEvent.keyDown(input!, { key: 'Enter' });
 
     expect(screen.getByRole('heading', { name: /delivery control plane/i })).toBeTruthy();
+  });
+
+  it('loads a validated shared portfolio and its selected template ahead of local storage', () => {
+    const sharedConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    sharedConfig.profile.name = 'Shared Profile';
+    const storedConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    storedConfig.profile.name = 'Stored Profile';
+    localStorage.setItem('portfolio_config_v2', JSON.stringify(storedConfig));
+    const payload = encodeURIComponent(JSON.stringify({ template: 'bento', config: sharedConfig }));
+    window.history.replaceState(null, '', `/#portfolio=${payload}`);
+
+    render(<App />);
+
+    expect(screen.getByRole('button', { name: /bento grid/i }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getAllByText('Shared Profile').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Stored Profile')).toBeNull();
+  });
+
+  it('opens a social network share intent with a short theme link, not the oversized config hash', () => {
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share to social media' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share on X' }));
+
+    expect(open).toHaveBeenCalledTimes(1);
+    const target = open.mock.calls[0][0] as string;
+    expect(target).toContain('https://twitter.com/intent/tweet');
+    const sharedUrl = new URL(target).searchParams.get('url') ?? '';
+    expect(sharedUrl).toContain('#t=terminal');
+    expect(sharedUrl).not.toContain('#portfolio=');
+    // The full config hash is ~13 KB encoded and triggers HTTP 414 on X.
+    expect(target.length).toBeLessThan(500);
+  });
+
+  it('restores the shared template from a short theme link', () => {
+    window.history.replaceState(null, '', '/#t=bento');
+    render(<App />);
+    expect(screen.getByRole('button', { name: /bento grid/i }).getAttribute('aria-current')).toBe('page');
+  });
+
+  it('copies the share link from the social share menu', async () => {
+    const writeText = vi.fn(async (_text: string) => undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share to social media' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy link' }));
+
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: 'Link copied' })).toBeTruthy());
+    const copiedUrl = writeText.mock.calls[0][0];
+    expect(copiedUrl).toContain('#portfolio=');
+    expect(decodeURIComponent(copiedUrl.split('#portfolio=')[1])).toContain('"template":"terminal"');
+  });
+
+  it('lets customization hide the default Made with badge across the active view', () => {
+    render(<App />);
+    expect(screen.getByText('Made with Terminal Portfolio')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /customize/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Show Made with Terminal Portfolio badge' }));
+
+    expect(screen.queryByText('Made with Terminal Portfolio')).toBeNull();
   });
 });

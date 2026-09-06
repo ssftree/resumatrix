@@ -33,10 +33,11 @@ src/main.tsx
 
 portfolio.config.ts ──> PortfolioConfig ──> App state ──> active presentation
                                ▲
-                               └──── localStorage: portfolio_config_v2
+                               ├──── localStorage: portfolio_config_v2
+                               └──── validated URL hash share payload
 ```
 
-`App.tsx` currently owns all long-lived UI state: active template, terminal theme and history, visual effects, modals, virtual path, and the active `PortfolioConfig`. Template changes are conditional renders rather than URL routes, so refreshing always returns to Terminal while saved portfolio content persists.
+`App.tsx` currently owns all long-lived UI state: active template, terminal theme and history, visual effects, modals, virtual path, and the active `PortfolioConfig`. Template changes are conditional renders rather than URL routes, so a normal refresh returns to Terminal while saved portfolio content persists. A validated share hash is the exception: it restores the shared template and config without persisting them automatically.
 
 ## Data model and ownership
 
@@ -52,6 +53,17 @@ Runtime customization follows this flow:
 4. Pass the same config into every visible presentation.
 
 Downloaded JSON is currently an export/backup format. Placing it in the repository root does not change a deployment; production defaults still come from `src/portfolio.config.ts`.
+
+## Sharing and attribution
+
+`SocialShareMenu` on the global template switcher offers labelled icon intents for X, LinkedIn, Facebook, Telegram, and email, plus a "Copy link" fallback. Two hash shapes back this:
+
+- `#t=<template>` — a short, template-only link. Social intents use it because the full payload overflows some networks' request-URI limit (X returns HTTP 414). The recipient lands on the shared theme with their own local or default config.
+- `#portfolio=<encoded>` — the full deep link that also carries the complete `PortfolioConfig`. Only "Copy link" produces it, for direct person-to-person sharing.
+
+Intents open in a new tab via `noopener,noreferrer` and never leave the app. Both hash shapes pass through `src/utils/portfolioConfig.ts` before they can initialize application state; malformed payloads fall back to validated local or default data.
+
+`PortfolioConfig.branding.showMadeWith` controls a global, print-hidden “Made with Terminal Portfolio” badge. Validation defaults this setting to `true` for older saved and imported configurations that predate the field.
 
 ## Terminal behavior
 

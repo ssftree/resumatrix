@@ -68,6 +68,9 @@ export interface EducationItem {
 
 export interface PortfolioConfig {
   version: string;
+  branding?: {
+    showMadeWith?: boolean;
+  };
   profile: DeveloperProfile;
   contact: ContactInfo;
   skills: SkillCategory[];

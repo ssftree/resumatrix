@@ -14,6 +14,9 @@ import { PortfolioConfig } from './types';
  */
 export const DEFAULT_PORTFOLIO_CONFIG: PortfolioConfig = {
   version: '2.5.0',
+  branding: {
+    showMadeWith: true,
+  },
   profile: {
     name: 'ssfu',
     title: 'Senior Full-Stack & Systems Engineer',

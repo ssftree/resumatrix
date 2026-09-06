@@ -51,6 +51,7 @@ describe('overlay accessibility', () => {
         currentTemplate="terminal"
         onSelectTemplate={vi.fn()}
         onOpenCustomizer={vi.fn()}
+        getShareContext={() => ({ url: 'https://example.test/#portfolio=%7B%7D', title: 't', text: 'x' })}
       />,
     );
 
@@ -58,7 +59,8 @@ describe('overlay accessibility', () => {
 
     expect(navigation.style.maxWidth).toBe('calc(100vw - 2rem)');
     expect(screen.getByRole('button', { name: /customize/i })).toBeTruthy();
-    expect(screen.getAllByRole('button')).toHaveLength(9);
+    expect(screen.getByRole('button', { name: 'Share to social media' })).toBeTruthy();
+    expect(screen.getAllByRole('button')).toHaveLength(10);
   });
 
   it('lets a keyboard user exit the Matrix overlay', () => {
