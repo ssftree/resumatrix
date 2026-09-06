@@ -13,6 +13,8 @@ import {
   Briefcase,
   Cpu,
   AlertCircle,
+  Wand2,
+  Loader2,
   Plus,
   Trash2,
   GraduationCap,
@@ -29,6 +31,16 @@ import {
 import { PRESET_CONFIGS } from '../portfolio.config';
 import { useModalA11y } from '../hooks/useModalA11y';
 import { parsePortfolioConfigJson } from '../utils/portfolioConfig';
+import {
+  DEFAULT_RESUME_IMPORT_SETTINGS,
+  RESUME_IMPORT_PROVIDERS,
+  loadResumeImportSettings,
+  parseResumeWithLLM,
+  providerForSettings,
+  saveResumeImportSettings,
+  type ResumeImportSettings,
+} from '../utils/resumeImport';
+import { RESUME_FILE_ACCEPT, extractResumeText } from '../utils/resumeFile';
 
 interface ConfigCustomizerModalProps {
   isOpen: boolean;
@@ -116,10 +128,18 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
 }) => {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [activeTab, setActiveTab] = useState<'profile' | 'projects' | 'skills' | 'experience' | 'json'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'ai' | 'projects' | 'skills' | 'experience' | 'json'>('profile');
   const [copied, setCopied] = useState(false);
   const [jsonInput, setJsonInput] = useState(() => JSON.stringify(config, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
+
+  // AI resume import state
+  const [aiSettings, setAiSettings] = useState<ResumeImportSettings>(() => loadResumeImportSettings());
+  const [resumeText, setResumeText] = useState('');
+  const [aiStatus, setAiStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [resumeFileBusy, setResumeFileBusy] = useState(false);
+  const resumeFileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Local editable draft state
   const [draft, setDraft] = useState<PortfolioConfig>(config);
@@ -218,6 +238,63 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
     };
     setDraft(next);
     onSaveConfig(next);
+  };
+
+  const updateAiSetting = (patch: Partial<ResumeImportSettings>) => {
+    setAiSettings((prev) => {
+      const next = { ...prev, ...patch };
+      saveResumeImportSettings(next);
+      return next;
+    });
+  };
+
+  const activeProvider = providerForSettings(aiSettings);
+
+  const handleProviderChange = (providerId: string) => {
+    const provider = RESUME_IMPORT_PROVIDERS.find((p) => p.id === providerId);
+    if (!provider || provider.id === 'custom') {
+      updateAiSetting({ baseUrl: '', model: '' });
+      return;
+    }
+    updateAiSetting({ baseUrl: provider.baseUrl, model: provider.model });
+  };
+
+  const handleResumeFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setResumeFileBusy(true);
+    setAiError(null);
+    setAiStatus('idle');
+    try {
+      const { text } = await extractResumeText(file);
+      setResumeText(text);
+    } catch (error) {
+      setAiError(
+        error instanceof Error ? error.message : 'Could not read that file.',
+      );
+    } finally {
+      setResumeFileBusy(false);
+    }
+  };
+
+  const handleParseResume = async () => {
+    setAiStatus('loading');
+    setAiError(null);
+    const result = await parseResumeWithLLM({
+      settings: aiSettings,
+      resumeText,
+      currentConfig: draft,
+    });
+    if (!result.success) {
+      setAiError('error' in result ? result.error : 'Could not parse the résumé.');
+      setAiStatus('idle');
+      return;
+    }
+    setDraft(result.data);
+    setJsonInput(JSON.stringify(result.data, null, 2));
+    onSaveConfig(result.data);
+    setAiStatus('success');
   };
 
   // ---- Profile stats -------------------------------------------------------
@@ -342,6 +419,7 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
         <div className="flex items-center px-6 border-b border-neutral-800 bg-[#0d1117] text-xs font-mono select-none overflow-x-auto">
           {[
             { id: 'profile', label: 'Basic Profile', icon: <User className="w-3.5 h-3.5" /> },
+            { id: 'ai', label: 'AI Import', icon: <Wand2 className="w-3.5 h-3.5" /> },
             { id: 'projects', label: `Projects (${draft.projects.length})`, icon: <Layers className="w-3.5 h-3.5" /> },
             { id: 'skills', label: `Skills (${draft.skills.length} groups)`, icon: <Cpu className="w-3.5 h-3.5" /> },
             { id: 'experience', label: `Experience (${draft.experience.length})`, icon: <Briefcase className="w-3.5 h-3.5" /> },
@@ -592,6 +670,184 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
                     className="h-4 w-4 accent-emerald-500"
                   />
                 </label>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: AI Resume Import */}
+          {activeTab === 'ai' && (
+            <div className="space-y-6 max-w-3xl">
+              <div className="space-y-1">
+                <h3 className="font-mono text-sm font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                  <Wand2 className="w-4 h-4" /> Import Résumé with AI
+                </h3>
+                <p className="text-neutral-400 text-[11px] leading-relaxed">
+                  Upload a PDF or Word résumé (or paste the text) and an LLM extracts the fields this
+                  customizer needs, then fills every tab for you. PDF and <code className="text-emerald-400">.docx</code>
+                  text is extracted in your browser; the résumé text and API key are then sent directly
+                  to the provider you pick below and never touch our servers. Defaults to DeepSeek
+                  (<code className="text-emerald-400">deepseek-chat</code>); any OpenAI-compatible
+                  endpoint works.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-neutral-400 mb-1 font-mono" htmlFor="ai-provider">
+                    Provider
+                  </label>
+                  <select
+                    id="ai-provider"
+                    value={activeProvider.id}
+                    onChange={(e) => handleProviderChange(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  >
+                    {RESUME_IMPORT_PROVIDERS.map((provider) => (
+                      <option key={provider.id} value={provider.id}>
+                        {provider.label}
+                      </option>
+                    ))}
+                  </select>
+                  {activeProvider.keysUrl && (
+                    <p className="mt-1 text-[11px] text-neutral-500 font-mono">
+                      Get a key:{' '}
+                      <a
+                        href={activeProvider.keysUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-emerald-400 hover:underline"
+                      >
+                        {activeProvider.keysUrl.replace(/^https?:\/\//, '')}
+                      </a>
+                    </p>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-neutral-400 mb-1 font-mono" htmlFor="ai-base-url">
+                      API Base URL
+                    </label>
+                    <input
+                      id="ai-base-url"
+                      type="text"
+                      value={aiSettings.baseUrl}
+                      placeholder={DEFAULT_RESUME_IMPORT_SETTINGS.baseUrl}
+                      onChange={(e) => updateAiSetting({ baseUrl: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-neutral-400 mb-1 font-mono" htmlFor="ai-model">
+                      Model
+                    </label>
+                    <input
+                      id="ai-model"
+                      type="text"
+                      value={aiSettings.model}
+                      placeholder={DEFAULT_RESUME_IMPORT_SETTINGS.model}
+                      onChange={(e) => updateAiSetting({ model: e.target.value })}
+                      className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-neutral-400 mb-1 font-mono" htmlFor="ai-api-key">
+                    API Key
+                  </label>
+                  <input
+                    id="ai-api-key"
+                    type="password"
+                    autoComplete="off"
+                    value={aiSettings.apiKey}
+                    onChange={(e) => updateAiSetting({ apiKey: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 font-mono"
+                  />
+                  <label className="mt-2 flex items-center gap-2 text-[11px] text-neutral-400 font-mono">
+                    <input
+                      type="checkbox"
+                      checked={aiSettings.remember}
+                      onChange={(e) => updateAiSetting({ remember: e.target.checked })}
+                      className="accent-emerald-500"
+                    />
+                    Remember key on this device (stored in localStorage)
+                  </label>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-neutral-400 font-mono" htmlFor="ai-resume-text">
+                      Résumé Text
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => resumeFileInputRef.current?.click()}
+                      disabled={resumeFileBusy}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 transition-colors text-[11px] disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {resumeFileBusy ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Upload className="w-3 h-3" />
+                      )}
+                      <span>
+                        {resumeFileBusy
+                          ? 'Reading file…'
+                          : 'Upload PDF / Word / .txt / .md'}
+                      </span>
+                    </button>
+                    <input
+                      ref={resumeFileInputRef}
+                      type="file"
+                      accept={RESUME_FILE_ACCEPT}
+                      onChange={handleResumeFile}
+                      className="hidden"
+                    />
+                  </div>
+                  <textarea
+                    id="ai-resume-text"
+                    rows={10}
+                    value={resumeText}
+                    onChange={(e) => {
+                      setResumeText(e.target.value);
+                      if (aiStatus === 'success') setAiStatus('idle');
+                    }}
+                    placeholder="Paste your résumé / CV here…"
+                    className="w-full px-3 py-2 rounded-lg bg-black/40 border border-neutral-700 text-white focus:outline-none focus:border-emerald-500 leading-relaxed font-mono"
+                  />
+                </div>
+
+                {aiError && (
+                  <div className="p-3 rounded-lg bg-red-900/30 border border-red-700/50 text-red-300 flex items-start gap-2 text-xs">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span className="break-words">{aiError}</span>
+                  </div>
+                )}
+
+                {aiStatus === 'success' && !aiError && (
+                  <div className="p-3 rounded-lg bg-emerald-900/30 border border-emerald-700/50 text-emerald-300 flex items-start gap-2 text-xs">
+                    <Check className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>
+                      Résumé parsed and applied. Review the Basic Profile, Projects, Skills and
+                      Experience tabs, then adjust anything the model missed.
+                    </span>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleParseResume}
+                  disabled={aiStatus === 'loading' || resumeFileBusy}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-colors text-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {aiStatus === 'loading' ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Wand2 className="w-4 h-4" />
+                  )}
+                  <span>{aiStatus === 'loading' ? 'Parsing résumé…' : 'Parse & Autofill'}</span>
+                </button>
               </div>
             </div>
           )}
