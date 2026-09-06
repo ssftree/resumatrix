@@ -12,7 +12,10 @@ import {
 } from 'lucide-react';
 
 export interface ShareContext {
+  /** Short, template-only link handed to social intents (X rejects long URIs). */
   url: string;
+  /** Full link that also restores the current PortfolioConfig; used by "Copy link". */
+  deepLinkUrl: string;
   title: string;
   text: string;
 }
@@ -121,7 +124,7 @@ export const SocialShareMenu: React.FC<SocialShareMenuProps> = ({ getShareContex
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(getShareContext().url);
+      await navigator.clipboard.writeText(getShareContext().deepLinkUrl);
       setCopied(true);
       window.clearTimeout(copyTimerRef.current);
       copyTimerRef.current = window.setTimeout(() => setCopied(false), 2400);

@@ -3,8 +3,10 @@ import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
 import type { PortfolioConfig } from '../types';
 import {
   createPortfolioShareHash,
+  createTemplateShareHash,
   parsePortfolioConfigJson,
   parsePortfolioShareHash,
+  parseTemplateShareHash,
   validatePortfolioConfig,
 } from './portfolioConfig';
 
@@ -161,5 +163,20 @@ describe('portfolio share hash', () => {
     const result = parsePortfolioShareHash(`#portfolio=${payload}`);
 
     expect(result).toEqual({ success: false, error: 'Invalid portfolio share: unsupported template.' });
+  });
+});
+
+describe('template share hash', () => {
+  it('round-trips a supported template through a short hash', () => {
+    const hash = createTemplateShareHash('retro');
+
+    expect(hash).toBe('#t=retro');
+    expect(parseTemplateShareHash(hash)).toBe('retro');
+  });
+
+  it('ignores an unsupported template or a non-template hash', () => {
+    expect(parseTemplateShareHash('#t=unknown')).toBeNull();
+    expect(parseTemplateShareHash('#portfolio=%7B%7D')).toBeNull();
+    expect(parseTemplateShareHash('')).toBeNull();
   });
 });

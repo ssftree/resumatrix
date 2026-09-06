@@ -189,7 +189,7 @@ describe('App browser state integration', () => {
     expect(screen.queryByText('Stored Profile')).toBeNull();
   });
 
-  it('opens a social network share intent with the current portfolio link', () => {
+  it('opens a social network share intent with a short theme link, not the oversized config hash', () => {
     const open = vi.fn();
     vi.stubGlobal('open', open);
     render(<App />);
@@ -201,8 +201,16 @@ describe('App browser state integration', () => {
     const target = open.mock.calls[0][0] as string;
     expect(target).toContain('https://twitter.com/intent/tweet');
     const sharedUrl = new URL(target).searchParams.get('url') ?? '';
-    expect(sharedUrl).toContain('#portfolio=');
-    expect(decodeURIComponent(sharedUrl.split('#portfolio=')[1])).toContain('"template":"terminal"');
+    expect(sharedUrl).toContain('#t=terminal');
+    expect(sharedUrl).not.toContain('#portfolio=');
+    // The full config hash is ~13 KB encoded and triggers HTTP 414 on X.
+    expect(target.length).toBeLessThan(500);
+  });
+
+  it('restores the shared template from a short theme link', () => {
+    window.history.replaceState(null, '', '/#t=bento');
+    render(<App />);
+    expect(screen.getByRole('button', { name: /bento grid/i }).getAttribute('aria-current')).toBe('page');
   });
 
   it('copies the share link from the social share menu', async () => {

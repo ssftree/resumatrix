@@ -56,7 +56,12 @@ Downloaded JSON is currently an export/backup format. Placing it in the reposito
 
 ## Sharing and attribution
 
-The global template switcher can share the current template and complete `PortfolioConfig`. The client encodes both into the URL hash; `SocialShareMenu` then opens that link as a share intent on X, LinkedIn, Facebook, Telegram, or email (each a labelled icon), with a "Copy link" fallback. Intents open in a new tab via `noopener,noreferrer` and never leave the app. Incoming payloads pass through `src/utils/portfolioConfig.ts` before they can initialize application state; malformed payloads fall back to validated local or default data.
+`SocialShareMenu` on the global template switcher offers labelled icon intents for X, LinkedIn, Facebook, Telegram, and email, plus a "Copy link" fallback. Two hash shapes back this:
+
+- `#t=<template>` — a short, template-only link. Social intents use it because the full payload overflows some networks' request-URI limit (X returns HTTP 414). The recipient lands on the shared theme with their own local or default config.
+- `#portfolio=<encoded>` — the full deep link that also carries the complete `PortfolioConfig`. Only "Copy link" produces it, for direct person-to-person sharing.
+
+Intents open in a new tab via `noopener,noreferrer` and never leave the app. Both hash shapes pass through `src/utils/portfolioConfig.ts` before they can initialize application state; malformed payloads fall back to validated local or default data.
 
 `PortfolioConfig.branding.showMadeWith` controls a global, print-hidden “Made with Terminal Portfolio” badge. Validation defaults this setting to `true` for older saved and imported configurations that predate the field.
 

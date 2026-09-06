@@ -368,6 +368,21 @@ const invalidShare = (message: string): PortfolioShareValidationResult => ({
 export const createPortfolioShareHash = (template: AppTemplate, config: PortfolioConfig): string =>
   `#portfolio=${encodeURIComponent(JSON.stringify({ template, config }))}`;
 
+/**
+ * A short, template-only share hash. Social networks (notably X) reject request
+ * URIs that carry the full `#portfolio=` payload with HTTP 414, so social
+ * intents link here and the recipient's own local/default config is used.
+ */
+export const createTemplateShareHash = (template: AppTemplate): string =>
+  `#t=${encodeURIComponent(template)}`;
+
+export const parseTemplateShareHash = (hash: string): AppTemplate | null => {
+  const prefix = '#t=';
+  if (!hash.startsWith(prefix)) return null;
+  const template = decodeURIComponent(hash.slice(prefix.length));
+  return appTemplates.has(template as AppTemplate) ? (template as AppTemplate) : null;
+};
+
 export const parsePortfolioShareHash = (hash: string): PortfolioShareValidationResult => {
   const prefix = '#portfolio=';
   if (!hash.startsWith(prefix)) return invalidShare('missing portfolio payload.');

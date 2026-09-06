@@ -31,14 +31,17 @@ import type { ShareContext } from './components/SocialShareMenu';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
 import {
   createPortfolioShareHash,
+  createTemplateShareHash,
   parsePortfolioConfigJson,
   parsePortfolioShareHash,
+  parseTemplateShareHash,
 } from './utils/portfolioConfig';
 
 export default function App() {
   const [sharedPortfolio] = useState(() => parsePortfolioShareHash(window.location.hash));
+  const [sharedTemplate] = useState(() => parseTemplateShareHash(window.location.hash));
   const [currentTemplate, setCurrentTemplate] = useState<AppTemplate>(() =>
-    sharedPortfolio.success ? sharedPortfolio.data.template : 'terminal',
+    sharedPortfolio.success ? sharedPortfolio.data.template : sharedTemplate ?? 'terminal',
   );
   const [themeKey, setThemeKey] = useState<ThemeKey>('matrix');
   const currentTheme: ThemeConfig = THEMES[themeKey];
@@ -86,7 +89,8 @@ export default function App() {
   const buildShareContext = (): ShareContext => {
     const baseUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
     return {
-      url: `${baseUrl}${createPortfolioShareHash(currentTemplate, portfolioConfig)}`,
+      url: `${baseUrl}${createTemplateShareHash(currentTemplate)}`,
+      deepLinkUrl: `${baseUrl}${createPortfolioShareHash(currentTemplate, portfolioConfig)}`,
       title: `${portfolioConfig.profile.name} — ${portfolioConfig.profile.title}`,
       text: `View ${portfolioConfig.profile.name}'s portfolio in the ${currentTemplate} theme.`,
     };
