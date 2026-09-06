@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_PORTFOLIO_CONFIG } from '../portfolio.config';
-import { parsePortfolioConfigJson, validatePortfolioConfig } from './portfolioConfig';
+import type { PortfolioConfig } from '../types';
+import {
+  createPortfolioShareHash,
+  parsePortfolioConfigJson,
+  parsePortfolioShareHash,
+  validatePortfolioConfig,
+} from './portfolioConfig';
 
 describe('validatePortfolioConfig', () => {
   it('returns a typed, independent config for a complete portfolio', () => {
@@ -102,5 +108,58 @@ describe('validatePortfolioConfig', () => {
       success: false,
       error: 'Invalid portfolio configuration: terminal.easterEggsEnabled must be a boolean.',
     });
+  });
+
+  it('defaults legacy configurations to showing the Made with badge', () => {
+    const legacyConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG) as PortfolioConfig;
+    delete legacyConfig.branding;
+
+    const result = validatePortfolioConfig(legacyConfig);
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.branding).toEqual({ showMadeWith: true });
+  });
+
+  it('preserves an explicitly disabled Made with badge', () => {
+    const config = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    config.branding = { showMadeWith: false };
+
+    const result = validatePortfolioConfig(config);
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.branding?.showMadeWith).toBe(false);
+  });
+});
+
+describe('portfolio share hash', () => {
+  it('round-trips the selected template and Unicode portfolio content through validation', () => {
+    const config = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    config.profile.name = '傅杉杉';
+
+    const result = parsePortfolioShareHash(createPortfolioShareHash('bento', config));
+
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.template).toBe('bento');
+    expect(result.data.config.profile.name).toBe('傅杉杉');
+  });
+
+  it('rejects malformed share data without throwing', () => {
+    const result = parsePortfolioShareHash('#portfolio=%7Bbroken');
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an unsupported shared template', () => {
+    const payload = encodeURIComponent(JSON.stringify({
+      template: 'unknown',
+      config: DEFAULT_PORTFOLIO_CONFIG,
+    }));
+
+    const result = parsePortfolioShareHash(`#portfolio=${payload}`);
+
+    expect(result).toEqual({ success: false, error: 'Invalid portfolio share: unsupported template.' });
   });
 });

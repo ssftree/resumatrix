@@ -7,6 +7,7 @@ import type {
   Project,
   SkillCategory,
 } from '../types';
+import type { AppTemplate } from '../types';
 import { normalizeExternalUrl } from './url';
 
 export type PortfolioConfigValidationResult =
@@ -15,6 +16,10 @@ export type PortfolioConfigValidationResult =
 
 type UnknownRecord = Record<string, unknown>;
 type ValidationError = Extract<PortfolioConfigValidationResult, { success: false }>;
+
+export type PortfolioShareValidationResult =
+  | { success: true; data: { template: AppTemplate; config: PortfolioConfig } }
+  | { success: false; error: string };
 
 const projectCategories = new Set<Project['category']>([
   'Full-Stack',
@@ -286,6 +291,16 @@ const readTerminal = (value: unknown): PortfolioConfig['terminal'] | ValidationE
   return { easterEggsEnabled };
 };
 
+const readBranding = (value: unknown): NonNullable<PortfolioConfig['branding']> | ValidationError => {
+  if (value === undefined) return { showMadeWith: true };
+  if (!isRecord(value)) return invalid('branding must be an object.');
+  const showMadeWith = value.showMadeWith;
+  if (showMadeWith !== undefined && typeof showMadeWith !== 'boolean') {
+    return invalid('branding.showMadeWith must be a boolean.');
+  }
+  return { showMadeWith: typeof showMadeWith === 'boolean' ? showMadeWith : true };
+};
+
 /**
  * Validates untrusted persisted/imported data and returns a fresh, typed copy.
  * The copy also discards unknown fields so all consumers receive one predictable shape.
@@ -294,6 +309,7 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
   if (!isRecord(value)) return invalid('root value must be an object.');
 
   const version = readString(value.version, 'version');
+  const branding = readBranding(value.branding);
   const profile = readProfile(value.profile);
   const contact = readContact(value.contact);
   const skills = readSkills(value.skills);
@@ -303,7 +319,7 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
   const terminal = readTerminal(value.terminal);
   const system = readSystem(value.system);
 
-  for (const result of [version, profile, contact, skills, experience, projects, education, terminal, system]) {
+  for (const result of [version, branding, profile, contact, skills, experience, projects, education, terminal, system]) {
     if (isFailure(result)) return result;
   }
 
@@ -311,6 +327,7 @@ export const validatePortfolioConfig = (value: unknown): PortfolioConfigValidati
     success: true,
     data: {
       version: version as string,
+      branding: branding as NonNullable<PortfolioConfig['branding']>,
       profile: profile as DeveloperProfile,
       contact: contact as ContactInfo,
       skills: skills as SkillCategory[],
@@ -329,5 +346,47 @@ export const parsePortfolioConfigJson = (json: string): PortfolioConfigValidatio
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unable to parse JSON.';
     return { success: false, error: `Invalid JSON: ${message}` };
+  }
+};
+
+const appTemplates = new Set<AppTemplate>([
+  'terminal',
+  'ide',
+  'bento',
+  'academic',
+  'retro',
+  'telemetry',
+  'devops',
+  'brutalism',
+]);
+
+const invalidShare = (message: string): PortfolioShareValidationResult => ({
+  success: false,
+  error: `Invalid portfolio share: ${message}`,
+});
+
+export const createPortfolioShareHash = (template: AppTemplate, config: PortfolioConfig): string =>
+  `#portfolio=${encodeURIComponent(JSON.stringify({ template, config }))}`;
+
+export const parsePortfolioShareHash = (hash: string): PortfolioShareValidationResult => {
+  const prefix = '#portfolio=';
+  if (!hash.startsWith(prefix)) return invalidShare('missing portfolio payload.');
+
+  try {
+    const payload = JSON.parse(decodeURIComponent(hash.slice(prefix.length))) as unknown;
+    if (!isRecord(payload)) return invalidShare('payload must be an object.');
+    if (typeof payload.template !== 'string' || !appTemplates.has(payload.template as AppTemplate)) {
+      return invalidShare('unsupported template.');
+    }
+    const config = validatePortfolioConfig(payload.config);
+    if (!config.success) {
+      return invalidShare('error' in config ? config.error : 'portfolio configuration is invalid.');
+    }
+    return {
+      success: true,
+      data: { template: payload.template as AppTemplate, config: config.data },
+    };
+  } catch {
+    return invalidShare('payload could not be decoded.');
   }
 };

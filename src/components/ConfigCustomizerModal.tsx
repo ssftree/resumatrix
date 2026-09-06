@@ -141,6 +141,15 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
     onSaveConfig(next);
   };
 
+  const handleMadeWithChange = (showMadeWith: boolean) => {
+    const next = {
+      ...draft,
+      branding: { ...draft.branding, showMadeWith },
+    };
+    setDraft(next);
+    onSaveConfig(next);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
       <div 
@@ -341,6 +350,27 @@ export const ConfigCustomizerModal: React.FC<ConfigCustomizerModalProps> = ({
                     />
                   </div>
                 </div>
+              </div>
+
+              <div className="space-y-3 pt-4 border-t border-neutral-800">
+                <h3 className="font-mono text-sm font-semibold text-emerald-400 uppercase tracking-wider">
+                  Sharing & Branding
+                </h3>
+                <label className="flex items-center justify-between gap-4 rounded-xl border border-neutral-800 bg-black/40 p-4 cursor-pointer">
+                  <span>
+                    <span className="block font-medium text-neutral-100">Made with badge</span>
+                    <span className="mt-1 block text-[11px] text-neutral-400">
+                      Show a small Terminal Portfolio credit on every layout.
+                    </span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    aria-label="Show Made with Terminal Portfolio badge"
+                    checked={draft.branding?.showMadeWith !== false}
+                    onChange={(event) => handleMadeWithChange(event.target.checked)}
+                    className="h-4 w-4 accent-emerald-500"
+                  />
+                </label>
               </div>
             </div>
           )}

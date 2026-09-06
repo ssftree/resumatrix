@@ -15,6 +15,7 @@ describe('App browser state integration', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    window.history.replaceState(null, '', '/');
     fullscreenElement = null;
     Element.prototype.scrollIntoView = vi.fn();
     Object.defineProperty(document, 'fullscreenElement', {
@@ -169,5 +170,48 @@ describe('App browser state integration', () => {
     fireEvent.keyDown(input!, { key: 'Enter' });
 
     expect(screen.getByRole('heading', { name: /delivery control plane/i })).toBeTruthy();
+  });
+
+  it('loads a validated shared portfolio and its selected template ahead of local storage', () => {
+    const sharedConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    sharedConfig.profile.name = 'Shared Profile';
+    const storedConfig = structuredClone(DEFAULT_PORTFOLIO_CONFIG);
+    storedConfig.profile.name = 'Stored Profile';
+    localStorage.setItem('portfolio_config_v2', JSON.stringify(storedConfig));
+    const payload = encodeURIComponent(JSON.stringify({ template: 'bento', config: sharedConfig }));
+    window.history.replaceState(null, '', `/#portfolio=${payload}`);
+
+    render(<App />);
+
+    expect(screen.getByRole('button', { name: /bento grid/i }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getAllByText('Shared Profile').length).toBeGreaterThan(0);
+    expect(screen.queryByText('Stored Profile')).toBeNull();
+  });
+
+  it('copies a link containing the current portfolio when native sharing is unavailable', async () => {
+    const writeText = vi.fn(async (_text: string) => undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share current theme' }));
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Link copied' })).toBeTruthy());
+    const copiedUrl = writeText.mock.calls[0][0];
+    expect(copiedUrl).toContain('#portfolio=');
+    expect(decodeURIComponent(copiedUrl.split('#portfolio=')[1])).toContain('"template":"terminal"');
+  });
+
+  it('lets customization hide the default Made with badge across the active view', () => {
+    render(<App />);
+    expect(screen.getByText('Made with Terminal Portfolio')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: /customize/i }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Show Made with Terminal Portfolio badge' }));
+
+    expect(screen.queryByText('Made with Terminal Portfolio')).toBeNull();
   });
 });

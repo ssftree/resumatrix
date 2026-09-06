@@ -51,6 +51,7 @@ describe('overlay accessibility', () => {
         currentTemplate="terminal"
         onSelectTemplate={vi.fn()}
         onOpenCustomizer={vi.fn()}
+        onShare={vi.fn()}
       />,
     );
 
@@ -58,7 +59,8 @@ describe('overlay accessibility', () => {
 
     expect(navigation.style.maxWidth).toBe('calc(100vw - 2rem)');
     expect(screen.getByRole('button', { name: /customize/i })).toBeTruthy();
-    expect(screen.getAllByRole('button')).toHaveLength(9);
+    expect(screen.getByRole('button', { name: 'Share current theme' })).toBeTruthy();
+    expect(screen.getAllByRole('button')).toHaveLength(10);
   });
 
   it('lets a keyboard user exit the Matrix overlay', () => {
