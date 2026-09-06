@@ -39,6 +39,7 @@ describe('App browser state integration', () => {
   afterEach(() => {
     cleanup();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it('tracks fullscreen changes initiated outside the app button', async () => {
@@ -188,18 +189,34 @@ describe('App browser state integration', () => {
     expect(screen.queryByText('Stored Profile')).toBeNull();
   });
 
-  it('copies a link containing the current portfolio when native sharing is unavailable', async () => {
+  it('opens a social network share intent with the current portfolio link', () => {
+    const open = vi.fn();
+    vi.stubGlobal('open', open);
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share to social media' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share on X' }));
+
+    expect(open).toHaveBeenCalledTimes(1);
+    const target = open.mock.calls[0][0] as string;
+    expect(target).toContain('https://twitter.com/intent/tweet');
+    const sharedUrl = new URL(target).searchParams.get('url') ?? '';
+    expect(sharedUrl).toContain('#portfolio=');
+    expect(decodeURIComponent(sharedUrl.split('#portfolio=')[1])).toContain('"template":"terminal"');
+  });
+
+  it('copies the share link from the social share menu', async () => {
     const writeText = vi.fn(async (_text: string) => undefined);
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText },
     });
-    Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
     render(<App />);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Share current theme' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Share to social media' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy link' }));
 
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Link copied' })).toBeTruthy());
+    await waitFor(() => expect(screen.getByRole('menuitem', { name: 'Link copied' })).toBeTruthy());
     const copiedUrl = writeText.mock.calls[0][0];
     expect(copiedUrl).toContain('#portfolio=');
     expect(decodeURIComponent(copiedUrl.split('#portfolio=')[1])).toContain('"template":"terminal"');

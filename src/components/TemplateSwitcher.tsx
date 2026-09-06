@@ -1,53 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { 
-  Terminal, 
-  Code2, 
-  LayoutGrid, 
-  FileText, 
+import React from 'react';
+import {
+  Terminal,
+  Code2,
+  LayoutGrid,
+  FileText,
   SlidersHorizontal,
   Monitor,
   Activity,
   GitBranch,
   Square,
-  Share2,
-  Check,
-  CircleAlert,
 } from 'lucide-react';
 import { AppTemplate } from '../types';
+import { SocialShareMenu, ShareContext } from './SocialShareMenu';
 
 interface TemplateSwitcherProps {
   currentTemplate: AppTemplate;
   onSelectTemplate: (template: AppTemplate) => void;
   onOpenCustomizer?: () => void;
-  onShare?: () => Promise<'shared' | 'copied' | 'failed'>;
+  getShareContext?: () => ShareContext;
 }
 
 export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
   currentTemplate,
   onSelectTemplate,
   onOpenCustomizer,
-  onShare,
+  getShareContext,
 }) => {
-  const [shareStatus, setShareStatus] = useState<'idle' | 'shared' | 'copied' | 'failed'>('idle');
-  const resetTimerRef = useRef<number | undefined>(undefined);
-
-  useEffect(() => () => window.clearTimeout(resetTimerRef.current), []);
-
-  const handleShare = async () => {
-    if (!onShare) return;
-    const status = await onShare();
-    setShareStatus(status);
-    window.clearTimeout(resetTimerRef.current);
-    resetTimerRef.current = window.setTimeout(() => setShareStatus('idle'), 2400);
-  };
-
-  const shareLabel = shareStatus === 'copied'
-    ? 'Link copied'
-    : shareStatus === 'shared'
-      ? 'Shared'
-      : shareStatus === 'failed'
-        ? 'Unable to share'
-        : 'Share current theme';
   const templates: { id: AppTemplate; label: string; icon: React.ReactNode; badge: string }[] = [
     {
       id: 'terminal',
@@ -153,24 +131,10 @@ export const TemplateSwitcher: React.FC<TemplateSwitcherProps> = ({
         </>
       )}
 
-      {onShare && (
+      {getShareContext && (
         <>
           <div className="w-[1px] h-4 bg-neutral-800 mx-0.5 shrink-0" />
-          <button
-            type="button"
-            onClick={handleShare}
-            aria-label={shareLabel}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-300 border border-sky-500/30 font-mono transition-colors shrink-0 whitespace-nowrap"
-          >
-            {shareStatus === 'failed'
-              ? <CircleAlert className="w-3.5 h-3.5" />
-              : shareStatus === 'idle'
-                ? <Share2 className="w-3.5 h-3.5" />
-                : <Check className="w-3.5 h-3.5" />}
-            <span className="font-medium">
-              {shareStatus === 'idle' ? 'Share' : shareLabel}
-            </span>
-          </button>
+          <SocialShareMenu getShareContext={getShareContext} />
         </>
       )}
     </nav>

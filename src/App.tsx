@@ -27,6 +27,7 @@ import { DevOpsControlView } from './components/templates/DevOpsControlView';
 import { SwissBrutalismView } from './components/templates/SwissBrutalismView';
 import { ConfigCustomizerModal } from './components/ConfigCustomizerModal';
 import { MadeWithBadge } from './components/MadeWithBadge';
+import type { ShareContext } from './components/SocialShareMenu';
 import { DEFAULT_PORTFOLIO_CONFIG } from './portfolio.config';
 import {
   createPortfolioShareHash,
@@ -82,30 +83,13 @@ export default function App() {
     }
   };
 
-  const handleShare = async (): Promise<'shared' | 'copied' | 'failed'> => {
+  const buildShareContext = (): ShareContext => {
     const baseUrl = `${window.location.origin}${window.location.pathname}${window.location.search}`;
-    const url = `${baseUrl}${createPortfolioShareHash(currentTemplate, portfolioConfig)}`;
-    const shareData = {
+    return {
+      url: `${baseUrl}${createPortfolioShareHash(currentTemplate, portfolioConfig)}`,
       title: `${portfolioConfig.profile.name} — ${portfolioConfig.profile.title}`,
       text: `View ${portfolioConfig.profile.name}'s portfolio in the ${currentTemplate} theme.`,
-      url,
     };
-
-    if (typeof navigator.share === 'function') {
-      try {
-        await navigator.share(shareData);
-        return 'shared';
-      } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return 'failed';
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(url);
-      return 'copied';
-    } catch {
-      return 'failed';
-    }
   };
 
   const [crtEnabled, setCrtEnabled] = useState<boolean>(true);
@@ -600,7 +584,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -630,7 +614,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -667,7 +651,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -697,7 +681,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -732,7 +716,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -769,7 +753,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -797,7 +781,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
             currentTemplate={currentTemplate}
             onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
             onOpenCustomizer={() => setConfigModalOpen(true)}
-            onShare={handleShare}
+            getShareContext={buildShareContext}
           />
         </div>
         {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
@@ -839,7 +823,7 @@ Usage: template <name> (e.g. template devops, template telemetry, template bruta
           currentTemplate={currentTemplate}
           onSelectTemplate={(tpl) => setCurrentTemplate(tpl)}
           onOpenCustomizer={() => setConfigModalOpen(true)}
-          onShare={handleShare}
+          getShareContext={buildShareContext}
         />
       </div>
       {portfolioConfig.branding?.showMadeWith !== false && <MadeWithBadge />}
